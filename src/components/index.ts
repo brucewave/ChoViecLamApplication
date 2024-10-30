@@ -8,9 +8,9 @@ import InputComponent from './InputComponent';
 import RowComponent from './RowComponent';
 import SectionComponent from './SectionComponent';
 import SpaceComponent from './SpaceComponent';
-import TagBarComponent from './TagBarComponent';
+import TabBarComponent from './TabBarComponent';
 import TextComponent from './TextComponent';
-
+import AvatarGroup from './AvatarGroup';
 export {
   SpaceComponent,
   TextComponent,
@@ -21,7 +21,8 @@ export {
   RowComponent,
   CircleComponent,
   CategoriesList,
-  TagBarComponent,
+  TabBarComponent,
   CardComponent,
   EventItem,
+  AvatarGroup,
 };

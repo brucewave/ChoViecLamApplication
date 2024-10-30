@@ -8,7 +8,7 @@ interface Props {
   onPress: () => void;
 }
 
-const TagBarComponent = (props: Props) => {
+const TabBarComponent = (props: Props) => {
   const {title, onPress} = props;
 
   return (
@@ -24,4 +24,4 @@ const TagBarComponent = (props: Props) => {
   );
 };
 
-export default TagBarComponent;
+export default TabBarComponent;
