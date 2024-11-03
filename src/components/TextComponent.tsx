@@ -12,17 +12,17 @@ interface Props {
   font?: string;
   styles?: StyleProp<TextStyle>;
   title?: boolean;
-  numberOfLine?: number;
+  numOfLine?: number;
 }
 
 const TextComponent = (props: Props) => {
-  const {text, size, flex, font, color, styles, title, numberOfLine} = props;
+  const {text, size, flex, font, color, styles, title, numOfLine} = props;
 
   const fontSizeDefault = Platform.OS === 'ios' ? 16 : 14;
 
   return (
     <Text
-      numberOfLines={numberOfLine}
+      numberOfLines={numOfLine}
       style={[
         globalStyles.text,
         {

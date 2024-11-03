@@ -4,7 +4,7 @@ import {
   SearchNormal1,
   Sort,
 } from 'iconsax-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Platform,
@@ -30,10 +30,42 @@ import {fontFamilies} from '../../constants/fontFamilies';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyles} from '../../styles/globalStyles';
 import { ImageBackground } from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
+import { AddressModel } from '../../models/AddressModel';
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
+  const [currentLocation, setCurrentLocation] = useState<AddressModel>();
+
 
   const auth = useSelector(authSelector);
+
+  useEffect(() => {
+    Geolocation.getCurrentPosition(position => {
+      if (position.coords) {
+        reverseGeoCode({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+      }
+    });
+  }, []);
+
+  const reverseGeoCode = async ({lat, long}: {lat: number; long: number}) => {
+    const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=vi-VI&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
+
+    try {
+      const res = await axios(api);
+
+      if (res && res.status === 200 && res.data) {
+        const items = res.data.items;
+        setCurrentLocation(items[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
 
   const itemEvent = {
@@ -82,13 +114,17 @@ const HomeScreen = ({navigation}: any) => {
                   color={appColors.white}
                 />
               </RowComponent>
-              <TextComponent
-                text="New York, USA"
+
+
+              {currentLocation && (
+                <TextComponent
+                text={`${currentLocation.address.city}, ${currentLocation.address.county}`}
                 flex={0}
                 color={appColors.white}
                 font={fontFamilies.medium}
                 size={13}
-              />
+                />
+              )}
             </View>
 
             <CircleComponent color="#524CE0" size={36}>

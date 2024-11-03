@@ -23,7 +23,7 @@ const LoginScreen = ({navigation}: any) => {
   const [password, setPassword] = useState('');
   const [isRemember, setIsRemember] = useState(true);
   const [isDisable, setIsDisable] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,6 +40,7 @@ const LoginScreen = ({navigation}: any) => {
     const emailValidation = Validate.email(email);
     if (emailValidation) {
       try {
+        setIsLoading(true);
         const res = await authenticationAPI.HandleAuthentication(
           '/login',
           {email, password},
@@ -52,8 +53,10 @@ const LoginScreen = ({navigation}: any) => {
           'auth',
           isRemember ? JSON.stringify(res.data) : email,
         );
+        setIsLoading(false);
       } catch (error) {
         console.log(error);
+        setIsLoading(false);
       }
     } else {
       Alert.alert('Email is not correct!!!!');
@@ -71,10 +74,11 @@ const LoginScreen = ({navigation}: any) => {
         <Image
           source={require('../../assets/images/text-logo.png')}
           style={{
-            width: 162,
+            width: 350,
             height: 114,
             marginBottom: 30,
           }}
+          resizeMode="contain"
         />
       </SectionComponent>
       <SectionComponent>
@@ -116,7 +120,7 @@ const LoginScreen = ({navigation}: any) => {
       <SpaceComponent height={16} />
       <SectionComponent>
         <ButtonComponent
-          disable={isDisable}
+          disable={isLoading || isDisable}
           onPress={handleLogin}
           text="SIGN IN"
           type="primary"

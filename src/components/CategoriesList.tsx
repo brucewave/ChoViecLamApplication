@@ -32,7 +32,7 @@ const CategoriesList = (props: Props) => {
         />
       ),
       iconColor: '#EE544A',
-      title: 'Sports',
+      title: 'Bán Thời Gian',
     },
     {
       key: '2',
@@ -44,13 +44,13 @@ const CategoriesList = (props: Props) => {
         />
       ),
       iconColor: '#F59762',
-      title: 'Music',
+      title: 'Toàn Thời Gian',
     },
     {
       key: '3',
       icon: <ChefFork color={isColor ? appColors.white : '#29D697'} />,
       iconColor: '#29D697',
-      title: 'Food',
+      title: 'Thời Vụ',
     },
     {
       key: '4',
@@ -62,7 +62,7 @@ const CategoriesList = (props: Props) => {
         />
       ),
       iconColor: '#46CDFB',
-      title: 'Art',
+      title: 'Cần Gấp',
     },
   ];
 
@@ -74,6 +74,7 @@ const CategoriesList = (props: Props) => {
           globalStyles.tag,
           {
             backgroundColor: isColor ? item.iconColor : appColors.white,
+            marginRight: 10,
           },
         ]}>
         {item.icon}
@@ -93,6 +94,7 @@ const CategoriesList = (props: Props) => {
       horizontal
       data={categories}
       renderItem={({item}) => renderTagCategory(item)}
+      
     />
   );
 };

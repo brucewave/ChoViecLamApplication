@@ -57,7 +57,9 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>This app needs access to location when open.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to location when open.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AirbnbCereal_W_Bd.otf</string>

@@ -8,8 +8,9 @@ export const appInfo = {
   // //Mang cong ty
   // BASE_URL: 'http://192.168.110.15:3001',
   //Mang rieng
-  BASE_URL: 'http://192.168.0.105:3001',
-
+  // BASE_URL: 'http://192.168.0.105:3001',
+  //Mang duy tan
+  BASE_URL: 'http://172.25.9.220:3001',
 
   
 };

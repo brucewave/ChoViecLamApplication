@@ -11,6 +11,7 @@ import SpaceComponent from './SpaceComponent';
 import TabBarComponent from './TabBarComponent';
 import TextComponent from './TextComponent';
 import AvatarGroup from './AvatarGroup';
+import ChoiceLocation from './ChoiceLocation';
 export {
   SpaceComponent,
   TextComponent,
@@ -25,4 +26,5 @@ export {
   CardComponent,
   EventItem,
   AvatarGroup,
+  ChoiceLocation,
 };
