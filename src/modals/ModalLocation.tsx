@@ -241,14 +241,91 @@
 // };
 
 // export default ModalLocation;
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, Modal, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { ButtonComponent, InputComponent, TextComponent } from '../components';
+import { RowComponent, SpaceComponent } from '../components';
+import { appColors } from '../constants/appColors';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { SearchNormal1 } from 'iconsax-react-native';
+import axios from 'axios';
+import { LocationModel } from '../models/LocationModel';
 
-const ModalLocation = () => {
+
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (val: {
+    address: string;
+    postion?: {
+      lat: number;
+      long: number;
+    };
+  }) => void;
+}
+
+
+const ModalLocation = (props: Props) => {
+  const {visible, onClose, onSelect} = props;
+  const [searchKey, setSearchKey] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [locations, setLocations] = useState<LocationModel[]>([]);
+
+  const handleClose = () => {
+    onClose();
+  }
+
+  useEffect(() => {
+    if (!searchKey) {
+      setLocations([]);
+    }
+  }, [searchKey]);
+
+  const handleSearchLocation = async () => {
+    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
+    try {
+      setIsLoading(true);
+      const res = await axios.get(api);
+      if (res && res.data && res.status === 200) {
+        setLocations(res.data.items);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+
+
+
   return (
-    <View>
-      <Text>ModalLocation</Text>
-    </View>
+    <Modal animationType="fade" visible={visible} style={{flex: 1}}>
+      <View style={{paddingVertical: 42, paddingHorizontal: 42}}>
+        <RowComponent justify="flex-end"  styles={{marginBottom: 20}}>
+          <View style={{flex: 1}}>
+            <InputComponent 
+            styles={{marginBottom: 0}}
+            affix={<SearchNormal1 size={20} color={appColors.gray} />}
+            placeholder="Tìm kiếm địa chỉ" 
+            value={searchKey} 
+            allowClear
+            onEnd={handleSearchLocation}
+            onChange={val => setSearchKey(val)} />
+          </View>
+          <SpaceComponent width={12} />
+
+
+          <ButtonComponent text="Đóng" type="link" onPress={handleClose} />
+        
+        </RowComponent>
+
+        <View>
+          {isLoading ? <ActivityIndicator /> : locations.length > 0 ? <FlatList data={locations} renderItem={({item}) => <TextComponent text={item.address.label} />} /> : <TextComponent text={searchKey ? 'Không tìm thấy địa chỉ' : 'Tìm kiếm địa chỉ'} />}
+        </View>
+
+
+      </View>
+    </Modal>
   )
 }
 

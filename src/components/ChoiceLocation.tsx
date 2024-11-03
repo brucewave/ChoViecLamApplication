@@ -1,64 +1,32 @@
-// import {ArrowRight2, Location} from 'iconsax-react-native';
-// import React, {useState} from 'react';
-// import {RowComponent, SpaceComponent, TextComponent} from '.';
-// import {appColors} from '../constants/appColors';
-// import {globalStyles} from '../styles/globalStyles';
-// import {ModalLocation} from '../modals';
-// interface Props {
-//   onSelect: (val: any) => void;
-// }
-
-// const ChoiceLocation = (props: Props) => {
-//   const {onSelect} = props;
-
-//   const [isVibleModalLocation, setIsVibleModalLocation] = useState(false);
-//   const [addressSelected, setAddressSelected] = useState<{
-//     address: string;
-//     position?: {
-//       lat: number;
-//       long: number;
-//     };
-//   }>();
-
-//   return (
-//     <>
-//       <RowComponent
-//         onPress={() => setIsVibleModalLocation(!isVibleModalLocation)}
-//         styles={[globalStyles.inputContainer]}>
-//         <Location variant="Bold" size={22} color={`${appColors.primary}80`} />
-
-//         <SpaceComponent width={12} />
-
-//         <TextComponent
-//           numOfLine={1}
-//           text={addressSelected ? addressSelected.address : 'Choice'}
-//           flex={1}
-//         />
-//         <ArrowRight2 color={appColors.primary} size={22} />
-//       </RowComponent>
-
-//       <ModalLocation
-//         visible={isVibleModalLocation}
-//         onClose={() => setIsVibleModalLocation(false)}
-//         onSelect={val => {
-//           setAddressSelected(val);
-//           onSelect(val);
-//         }}
-//       />
-//     </>
-//   );
-// };
-
-// export default ChoiceLocation;
 import { View, Text } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
+import RowComponent from './RowComponent';
+import { globalStyles } from '../styles/globalStyles';
+import TextComponent from './TextComponent';
+import { ArrowRight2, Location } from 'iconsax-react-native';
+import { appColors } from '../constants/appColors';
+import CardComponent from './CardComponent';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import SpaceComponent from './SpaceComponent';
+import ModalLocation from '../modals/ModalLocation';
 
 const ChoiceLocation = () => {
+  const [isVisibleLocation, setIsVisibleLocation] = useState(false);
+
   return (
-    <View>
-      <Text>ChoiceLocation</Text>
-    </View>
-  )
-}
+    <>
+      <RowComponent styles={[globalStyles.inputContainer, ]}
+      onPress={() => setIsVisibleLocation(!isVisibleLocation)}>
+      <Location variant="Bold" size={22} color={`${appColors.primary}80`} />
+      <SpaceComponent width={12} />
+      <TextComponent text="Đà Nẵng, Việt Nam" flex={1} />
+      <ArrowRight2 color={appColors.primary} size={22} />
+    </RowComponent>
+
+    <ModalLocation visible={isVisibleLocation} onClose={() => setIsVisibleLocation(false)} onSelect={() => {}} />
+    </>
+
+  );
+};
 
 export default ChoiceLocation

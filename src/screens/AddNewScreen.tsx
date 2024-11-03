@@ -70,7 +70,9 @@ const AddNewScreen = () => {
           onChange={value => handdleChangeValue('description', value)}
         />
       </SectionComponent>
-      <ChoiceLocation />
+      <SectionComponent>
+        <ChoiceLocation />
+      </SectionComponent>
       <SectionComponent>
         <ButtonComponent text="Thêm công việc" onPress={handleAddEvent} type="primary" />
       </SectionComponent>
