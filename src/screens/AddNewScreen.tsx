@@ -71,6 +71,16 @@ const AddNewScreen = () => {
         />
       </SectionComponent>
       <SectionComponent>
+        <InputComponent
+          placeholder="Địa chỉ"
+          multiline
+          numberOfLine={4}
+          allowClear
+          value={eventData.locationTitle}
+          onChange={value => handdleChangeValue('locationTitle', value)}
+        />
+      </SectionComponent>
+      <SectionComponent>
         <ChoiceLocation />
       </SectionComponent>
       <SectionComponent>

@@ -250,6 +250,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { SearchNormal1 } from 'iconsax-react-native';
 import axios from 'axios';
 import { LocationModel } from '../models/LocationModel';
+import MapView from 'react-native-maps';
+import { appInfo } from '../constants/appInfos';
 
 
 interface Props {
@@ -270,6 +272,11 @@ const ModalLocation = (props: Props) => {
   const [searchKey, setSearchKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [locations, setLocations] = useState<LocationModel[]>([]);
+  const [addressSelected, setAddressSelected] = useState('');
+
+  useEffect(() => {
+    console.log(addressSelected)
+  }, [addressSelected]);
 
   const handleClose = () => {
     onClose();
@@ -296,7 +303,7 @@ const ModalLocation = (props: Props) => {
 
   }
 
-
+  console.log(locations)
 
   return (
     <Modal animationType="fade" visible={visible} style={{flex: 1}}>
@@ -311,6 +318,20 @@ const ModalLocation = (props: Props) => {
             allowClear
             onEnd={handleSearchLocation}
             onChange={val => setSearchKey(val)} />
+            <View style={{position: 'absolute', top: 60, right: 10, left: 10, backgroundColor: appColors.white}}>
+              {isLoading ? <ActivityIndicator /> : locations.length > 0 ? <FlatList data={locations} renderItem={({item}) => 
+                <TouchableOpacity onPress={() => {
+                  setAddressSelected(item.address.label);
+                  setSearchKey('');
+                }}>
+                  <TouchableOpacity style={{marginBottom: 12}} onPress={()=>{
+                    setAddressSelected(item.address.label);
+                    setSearchKey('');
+                  }}>
+                  <TextComponent text={item.address.label} />
+                  </TouchableOpacity>
+                </TouchableOpacity>} /> : <TextComponent text={searchKey ? 'Không tìm thấy địa chỉ' : 'Tìm kiếm địa chỉ'} />}
+            </View>
           </View>
           <SpaceComponent width={12} />
 
@@ -319,12 +340,21 @@ const ModalLocation = (props: Props) => {
         
         </RowComponent>
 
-        <View>
-          {isLoading ? <ActivityIndicator /> : locations.length > 0 ? <FlatList data={locations} renderItem={({item}) => <TextComponent text={item.address.label} />} /> : <TextComponent text={searchKey ? 'Không tìm thấy địa chỉ' : 'Tìm kiếm địa chỉ'} />}
-        </View>
+
 
 
       </View>
+
+      <MapView style={{width: appInfo.sizes.WIDTH, height: 200}}
+      initialRegion={{
+          latitude: 10.776360,
+          longitude: 106.681290,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }} />
+
+
+
     </Modal>
   )
 }

@@ -33,12 +33,47 @@ import { ImageBackground } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { AddressModel } from '../../models/AddressModel';
+import Geocoder from 'react-native-geocoding';
+
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [currentLocation, setCurrentLocation] = useState<AddressModel>();
 
 
   const auth = useSelector(authSelector);
+
+
+  const getCoordinatesFromAddress = async (address: string) => {
+    const apiKey = process.env.MAP_API_KEY;
+    const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+  
+    try {
+      const response = await axios.get(apiUrl);
+      if (response.data && response.data.results.length > 0) {
+        const result = response.data.results[0];
+        const location = result.geometry.location;
+        const formattedAddress = result.formatted_address;
+        const addressComponents = result.address_components;
+        
+        console.log('--------------------------------------');
+        console.log('Formatted Address:', formattedAddress);
+        console.log('Latitude:', location.lat);
+        console.log('Longitude:', location.lng);
+        reverseGeoCode({ lat: location.lat, long: location.lng });
+
+      } else {
+        console.log('No results found for the address.');
+      }
+    } catch (error) {
+      console.error('Error fetching coordinates:', error);
+    }
+  };
+  
+  useEffect(() => {
+    getCoordinatesFromAddress('64 Nguyễn Chí Thanh, Hải Châu, Đà Nẵng');
+  }, []);
+
+
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -51,18 +86,22 @@ const HomeScreen = ({navigation}: any) => {
     });
   }, []);
 
-  const reverseGeoCode = async ({lat, long}: {lat: number; long: number}) => {
-    const api = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=vi-VI&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
-
+  const reverseGeoCode = async ({ lat, long }: { lat: number; long: number }) => {
+    const apiKey = process.env.MAP_API_KEY;
+    const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?latlng=${lat},${long}&key=${apiKey}`;
+  
     try {
-      const res = await axios(api);
-
-      if (res && res.status === 200 && res.data) {
-        const items = res.data.items;
-        setCurrentLocation(items[0]);
+      const res = await axios.get(apiUrl);
+  
+      if (res.data && res.data.results.length > 0) {
+        const result = res.data.results[0];
+        const formattedAddress = result.formatted_address;
+          console.log('Reverse Geocoded Address:', formattedAddress);
+      } else {
+        console.log('No results found for the coordinates.');
       }
     } catch (error) {
-      console.log(error);
+      console.log('Error fetching address:', error);
     }
   };
 

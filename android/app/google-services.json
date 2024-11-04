@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "308679982675",
+    "project_id": "chovieclamapplication-61193",
+    "storage_bucket": "chovieclamapplication-61193.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:308679982675:android:0cd01dbd033b9b99a990a6",
+        "android_client_info": {
+          "package_name": "com.ChoViecLamApplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRSdmRnV_sb7I-_NY9jjVW1qRVl90HB8k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
