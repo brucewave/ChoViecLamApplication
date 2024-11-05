@@ -5,6 +5,7 @@ import { ButtonComponent, ContainerComponent, DateTimePicker, InputComponent, Ro
 import { useSelector } from 'react-redux';
 import { authSelector } from '../redux/reducers/authReducer';
 import ChoiceLocation from '../components/ChoiceLocation';
+import userAPI from '../apis/userApi';
 
 const initValues = {
   title: '',
@@ -31,8 +32,7 @@ const AddNewScreen = () => {
     ...initValues,
     authorId: auth.id,
   });
-
-  console.log(auth);
+  
   const [usersSelects, setUsersSelects] = useState<SelectModel[]>([]);
   const [fileSelected, setFileSelected] = useState<any>();
   const [errorsMess, setErrorsMess] = useState<string[]>([]);
@@ -45,8 +45,10 @@ const AddNewScreen = () => {
     setEventData(items);
   };
 
-  const handleAddEvent = () => {
-    console.log(eventData);
+  const handleAddEvent = async () => {
+    const res = await userAPI.HandleUser('/get-all');
+    console.log(res);
+    // console.log(eventData);
   };
 
   return (
