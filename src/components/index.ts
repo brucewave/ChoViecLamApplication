@@ -12,6 +12,7 @@ import TabBarComponent from './TabBarComponent';
 import TextComponent from './TextComponent';
 import AvatarGroup from './AvatarGroup';
 import ChoiceLocation from './ChoiceLocation';
+import DateTimePicker from './DateTimePicker';
 export {
   SpaceComponent,
   TextComponent,
@@ -27,4 +28,5 @@ export {
   EventItem,
   AvatarGroup,
   ChoiceLocation,
+  DateTimePicker,
 };

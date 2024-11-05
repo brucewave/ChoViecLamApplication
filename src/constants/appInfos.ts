@@ -5,12 +5,19 @@ export const appInfo = {
     WIDTH: Dimensions.get('window').width,
     HEIGHT: Dimensions.get('window').height,
   },
-  // //Mang cong ty
-  // BASE_URL: 'http://192.168.110.15:3001',
-  //Mang rieng
-  // BASE_URL: 'http://192.168.0.105:3001',
-  //Mang duy tan
   BASE_URL: 'http://172.25.9.220:3001',
-
-  
+  monthNames: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
 };

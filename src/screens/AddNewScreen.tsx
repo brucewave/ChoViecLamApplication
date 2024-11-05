@@ -1,7 +1,7 @@
 import {View, Text} from 'react-native';
 import React, { useState } from 'react';
 import { SelectModel } from '../models/SelectModel';
-import { ButtonComponent, ContainerComponent, InputComponent, SectionComponent, TextComponent } from '../components';
+import { ButtonComponent, ContainerComponent, DateTimePicker, InputComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '../components';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../redux/reducers/authReducer';
 import ChoiceLocation from '../components/ChoiceLocation';
@@ -32,7 +32,7 @@ const AddNewScreen = () => {
     authorId: auth.id,
   });
 
-
+  console.log(auth);
   const [usersSelects, setUsersSelects] = useState<SelectModel[]>([]);
   const [fileSelected, setFileSelected] = useState<any>();
   const [errorsMess, setErrorsMess] = useState<string[]>([]);
@@ -74,11 +74,16 @@ const AddNewScreen = () => {
         <InputComponent
           placeholder="Địa chỉ"
           multiline
-          numberOfLine={4}
           allowClear
           value={eventData.locationTitle}
           onChange={value => handdleChangeValue('locationTitle', value)}
         />
+        <RowComponent>
+          <DateTimePicker label="Thời gian bắt đầu" type="time" onSelect={value => handdleChangeValue('startAt', value)} />
+          <SpaceComponent width={10} />
+          <DateTimePicker label="Thời gian kết thúc" type="time" onSelect={value => handdleChangeValue('endAt', value)} />
+        </RowComponent>
+        <DateTimePicker label="Ngày đăng" type="date" onSelect={value => handdleChangeValue('date', value)} />
       </SectionComponent>
       <SectionComponent>
         <ChoiceLocation />

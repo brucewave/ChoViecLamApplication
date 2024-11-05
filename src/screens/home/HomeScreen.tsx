@@ -38,6 +38,16 @@ import Geocoder from 'react-native-geocoding';
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [currentLocation, setCurrentLocation] = useState<AddressModel>();
+  useEffect(() => {
+    Geolocation.getCurrentPosition(position => {
+      if (position.coords) {
+        reverseGeoCode({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+      }
+    });
+  }, []);
 
 
   const auth = useSelector(authSelector);
@@ -55,10 +65,6 @@ const HomeScreen = ({navigation}: any) => {
         const formattedAddress = result.formatted_address;
         const addressComponents = result.address_components;
         
-        console.log('--------------------------------------');
-        console.log('Formatted Address:', formattedAddress);
-        console.log('Latitude:', location.lat);
-        console.log('Longitude:', location.lng);
         reverseGeoCode({ lat: location.lat, long: location.lng });
 
       } else {
@@ -75,16 +81,7 @@ const HomeScreen = ({navigation}: any) => {
 
 
 
-  useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-      if (position.coords) {
-        reverseGeoCode({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-      }
-    });
-  }, []);
+
 
   const reverseGeoCode = async ({ lat, long }: { lat: number; long: number }) => {
     const apiKey = process.env.MAP_API_KEY;
@@ -96,7 +93,6 @@ const HomeScreen = ({navigation}: any) => {
       if (res.data && res.data.results.length > 0) {
         const result = res.data.results[0];
         const formattedAddress = result.formatted_address;
-          console.log('Reverse Geocoded Address:', formattedAddress);
       } else {
         console.log('No results found for the coordinates.');
       }

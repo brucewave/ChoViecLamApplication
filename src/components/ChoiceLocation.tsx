@@ -10,8 +10,20 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SpaceComponent from './SpaceComponent';
 import ModalLocation from '../modals/ModalLocation';
 
+interface AddressSelected {
+  address: string;
+  position?: {
+    lat: number;
+    long: number;
+  };
+}
+
 const ChoiceLocation = () => {
   const [isVisibleLocation, setIsVisibleLocation] = useState(false);
+  const [addressSelected, setAddressSelected] = useState<AddressSelected>({
+    address: '',
+    position: undefined,
+  });
 
   return (
     <>
@@ -19,14 +31,17 @@ const ChoiceLocation = () => {
       onPress={() => setIsVisibleLocation(!isVisibleLocation)}>
       <Location variant="Bold" size={22} color={`${appColors.primary}80`} />
       <SpaceComponent width={12} />
-      <TextComponent text="Đà Nẵng, Việt Nam" flex={1} />
+      <TextComponent numOfLine={1} text={addressSelected.address ? addressSelected.address : "Chọn địa điểm"} flex={1} />
       <ArrowRight2 color={appColors.primary} size={22} />
     </RowComponent>
 
-    <ModalLocation visible={isVisibleLocation} onClose={() => setIsVisibleLocation(false)} onSelect={() => {}} />
+    <ModalLocation visible={isVisibleLocation} onClose={() => setIsVisibleLocation(false)} 
+    onSelect={val => {
+      setAddressSelected(val);
+    }} 
+    />
     </>
-
   );
 };
 
-export default ChoiceLocation
+export default ChoiceLocation;
