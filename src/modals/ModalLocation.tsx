@@ -13,6 +13,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { AddressModel } from '../models/AddressModel';
 import Geocoder from 'react-native-geocoding';
 import WebView from 'react-native-webview';
+import Map from '../components/Map';
 
 
 Geocoder.init(process.env.MAP_API_KEY as string);
@@ -49,7 +50,8 @@ const ModalLocation = (props: Props) => {
   }, []);
 
   const handleSearchLocation = async () => {
-    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
+    const apiKey = process.env.MAP_API_KEY;
+    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=${apiKey}`;
     try {
       setIsLoading(true);
       const res = await axios.get(api);
@@ -63,25 +65,34 @@ const ModalLocation = (props: Props) => {
   };
 
   const handleGetLatLongFromAddress = async (address: string) => {
-const apiKey = process.env.MAP_API_KEY;
-    const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+    const apiKey = process.env.MAP_API_KEY;
+    const apiUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(address)}&apiKey=${apiKey}`;
 
     try {
       const response = await axios.get(apiUrl);
-      if (response.data && response.data.results.length > 0) {
-        const location = response.data.results[0].geometry.location;
-        setCurrentLocation({
+  
+      // Here API trả về trong `items`, không phải `results`
+      if (response.data && response.data.items && response.data.items.length > 0) {
+        const location = response.data.items[0].position;
+        const currentLocation = {
           lat: location.lat,
           long: location.lng,
-        });
+        };
+        
+        console.log('--------location---------');
+        console.log(currentLocation.lat);
+        console.log(currentLocation.long);
+  
+        return currentLocation;
       } else {
         console.log('Không tìm thấy địa chỉ');
+        return null;
       }
     } catch (error) {
       console.error('Lỗi khi lấy thông tin địa chỉ:', error);
+      return null;
     }
   };
-
   const handleClose = () => {
     onClose();
   }
@@ -91,6 +102,7 @@ const apiKey = process.env.MAP_API_KEY;
       setLocations([]);
     }
   }, [searchKey]);
+  
 
   return (
     <Modal animationType="fade" visible={visible} style={{flex: 1}}>
@@ -113,42 +125,22 @@ const apiKey = process.env.MAP_API_KEY;
                   renderItem={({item}) => 
                     <TouchableOpacity onPress={() => {
                       setAddressSelected(item.address.label);
-                      setSearchKey('');
+                      setSearchKey(item.address.label);
                       handleGetLatLongFromAddress(item.address.label);
+                      setLocations([]);
                     }}>
                       <TextComponent text={item.address.label} />
                     </TouchableOpacity>
                   } 
                 />
-              ) : <TextComponent text={searchKey ? 'Không tìm thấy địa chỉ' : 'Tìm kiếm địa chỉ'} />}
+              ) : <TextComponent text={searchKey? '' : 'Tìm kiếm địa chỉ'} />}
             </View>
           </View>
           <SpaceComponent width={12} />
           <ButtonComponent text="Đóng" type="link" onPress={handleClose} />
         </RowComponent>
-      {currentLocation && 
-      <>
-        <MapView 
-          style={{width: appInfo.sizes.WIDTH, height: 500, marginTop: 10}}
-          initialRegion={{
-            latitude: currentLocation.lat,
-            longitude: currentLocation.long,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          region={{
-            latitude: currentLocation.lat,
-            longitude: currentLocation.long,
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.015,
-          }}
-        />
-
-
-      </>
-        
-      }
-
+      {/* {currentLocation && } */}
+      {/* <Map apikey={process.env.MAP_API_KEY as string} /> */}
       <ButtonComponent styles={{marginTop: 40}} text="Chọn" onPress={() => {
         onSelect({
           address: addressSelected,

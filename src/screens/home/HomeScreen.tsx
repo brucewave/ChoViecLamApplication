@@ -104,12 +104,12 @@ const HomeScreen = ({navigation}: any) => {
 
 
   const itemEvent = {
-    title: 'International Band Music Concert',
+    title: 'Nhân viên phục vụ nhà hàng',
     description:
-      'Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase.',
+      'Nhà hàng Ánh Sao cần tuyển 10 nhân viên phục vụ nhà hàng',
     location: {
-      title: 'Gala Convention Center',
-      address: '36 Guild Street London, UK',
+      title: 'Nhà hàng Ánh Sao',
+      address: '36 Nguyễn Chí Thanh, Hải Châu, Đà Nẵng',
     },
     imageUrl: '',
     users: [''],
@@ -239,7 +239,7 @@ const HomeScreen = ({navigation}: any) => {
          },
        ]}>
        <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 24}}>
-         <TabBarComponent title="Upcoming Events" onPress={() => {}} />
+         <TabBarComponent title="Việc Vừa Đăng" onPress={() => {}} />
          <FlatList
            showsHorizontalScrollIndicator={false}
            horizontal
@@ -280,7 +280,7 @@ const HomeScreen = ({navigation}: any) => {
           </ImageBackground>
         </SectionComponent>
         <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 24}}>
-         <TabBarComponent title="Nearby You" onPress={() => {}} />
+         <TabBarComponent title="Việc gần đây" onPress={() => {}} />
          <FlatList
            showsHorizontalScrollIndicator={false}
            horizontal

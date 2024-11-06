@@ -13,7 +13,10 @@ import TextComponent from './TextComponent';
 import AvatarGroup from './AvatarGroup';
 import ChoiceLocation from './ChoiceLocation';
 import DateTimePicker from './DateTimePicker';
+import ButtonImagePicker from './ButtonImagePicker';
+
 export {
+  ButtonImagePicker,
   SpaceComponent,
   TextComponent,
   ButtonComponent,

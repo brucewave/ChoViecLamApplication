@@ -1,7 +1,7 @@
 import {View, Text} from 'react-native';
 import React, { useState } from 'react';
 import { SelectModel } from '../models/SelectModel';
-import { ButtonComponent, ContainerComponent, DateTimePicker, InputComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '../components';
+import { ButtonComponent, ButtonImagePicker, ContainerComponent, DateTimePicker, InputComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '../components';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../redux/reducers/authReducer';
 import ChoiceLocation from '../components/ChoiceLocation';
@@ -45,18 +45,35 @@ const AddNewScreen = () => {
     setEventData(items);
   };
 
+
+  const handleFileSelected = (val: any) => {
+    setFileSelected(val);
+    handdleChangeValue('photoUrl', val.path);
+  };
   const handleAddEvent = async () => {
-    const res = await userAPI.HandleUser('/get-all');
-    console.log(res);
+    // const res = await userAPI.HandleUser('/get-all');
+    // const resMe = await userAPI.HandleUser('/me');
+    // console.log('------------------------------res:---------------------------------------');
+    // console.log(res);
+    // console.log(resMe);
     // console.log(eventData);
   };
 
   return (
     <ContainerComponent isScroll>
       <SectionComponent>
-        <TextComponent text="Thông tin công việc" />
+        <TextComponent text="Thêm công việc" />
       </SectionComponent>
       <SectionComponent>
+        <SpaceComponent height={10} />
+        <ButtonImagePicker
+          onSelect={(val: any) =>
+            val.type === 'url'
+              ? handdleChangeValue('photoUrl', val.value as string)
+              : handleFileSelected(val.value)
+          }
+        />
+        <SpaceComponent height={10} />
         <InputComponent
           placeholder="Tiêu đề"
           allowClear
@@ -89,6 +106,9 @@ const AddNewScreen = () => {
       </SectionComponent>
       <SectionComponent>
         <ChoiceLocation />
+      </SectionComponent>
+      <SectionComponent>
+        <InputComponent placeholder="Lương" type="number-pad" allowClear value={eventData.price} onChange={value => handdleChangeValue('price', value)} />
       </SectionComponent>
       <SectionComponent>
         <ButtonComponent text="Thêm công việc" onPress={handleAddEvent} type="primary" />
