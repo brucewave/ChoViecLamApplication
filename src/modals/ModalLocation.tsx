@@ -1,6 +1,6 @@
 import { View, Text, Modal, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ButtonComponent, InputComponent, TextComponent } from '../components';
+import { ButtonComponent, InputComponent, MapComponent, TextComponent } from '../components';
 import { RowComponent, SpaceComponent } from '../components';
 import { appColors } from '../constants/appColors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -12,8 +12,6 @@ import { appInfo } from '../constants/appInfos';
 import Geolocation from '@react-native-community/geolocation';
 import { AddressModel } from '../models/AddressModel';
 import Geocoder from 'react-native-geocoding';
-import WebView from 'react-native-webview';
-import Map from '../components/Map';
 
 
 Geocoder.init(process.env.MAP_API_KEY as string);
@@ -140,7 +138,9 @@ const ModalLocation = (props: Props) => {
           <ButtonComponent text="Đóng" type="link" onPress={handleClose} />
         </RowComponent>
       {/* {currentLocation && } */}
-      {/* <Map apikey={process.env.MAP_API_KEY as string} /> */}
+      {/* <MapComponent apikey={process.env.MAP_API_KEY as string} /> */}
+      <SpaceComponent height={22} />
+      <MapComponent />
       <ButtonComponent styles={{marginTop: 40}} text="Chọn" onPress={() => {
         onSelect({
           address: addressSelected,

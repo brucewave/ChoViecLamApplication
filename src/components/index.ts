@@ -14,8 +14,9 @@ import AvatarGroup from './AvatarGroup';
 import ChoiceLocation from './ChoiceLocation';
 import DateTimePicker from './DateTimePicker';
 import ButtonImagePicker from './ButtonImagePicker';
-
+import MapComponent from './MapComponent';
 export {
+  MapComponent,
   ButtonImagePicker,
   SpaceComponent,
   TextComponent,
