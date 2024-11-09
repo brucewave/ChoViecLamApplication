@@ -22,6 +22,7 @@
     "@react-navigation/native-stack": "^6.9.17",
     "@reduxjs/toolkit": "^2.0.1",
     "@rnmapbox/maps": "^10.1.33",
+    "@turf/helpers": "^7.1.0",
     "add": "^2.0.6",
     "axios": "^1.6.5",
     "iconsax-react-native": "^0.0.8",

@@ -80,7 +80,7 @@ const ModalLocation = (props: Props) => {
         console.log('--------location---------');
         console.log(currentLocation.lat);
         console.log(currentLocation.long);
-  
+        setCurrentLocation(currentLocation);
         return currentLocation;
       } else {
         console.log('Không tìm thấy địa chỉ');
@@ -139,8 +139,9 @@ const ModalLocation = (props: Props) => {
         </RowComponent>
       {/* {currentLocation && } */}
       {/* <MapComponent apikey={process.env.MAP_API_KEY as string} /> */}
-      <SpaceComponent height={22} />
-      <MapComponent />
+
+
+
       <ButtonComponent styles={{marginTop: 40}} text="Chọn" onPress={() => {
         onSelect({
           address: addressSelected,
@@ -150,6 +151,10 @@ const ModalLocation = (props: Props) => {
         onClose();
       }} type="primary" />
       </View>
+
+
+      <MapComponent />
+
 
     </Modal>
   )

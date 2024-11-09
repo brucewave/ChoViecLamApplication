@@ -1,32 +1,52 @@
 import {View, Text, StyleSheet} from 'react-native';
-import React from 'react';
-import Mapbox from '@rnmapbox/maps';
+import React, { useEffect, useState } from 'react';
+import Mapbox, { ShapeSource, SymbolLayer, Camera, Images } from '@rnmapbox/maps';
+import { appInfo } from '../../constants/appInfos';
+import Geolocation from '@react-native-community/geolocation'
+import { featureCollection, point } from '@turf/helpers';
+import icon_partime from '../../assets/images/icon_partime.png';
 
-Mapbox.setAccessToken('pk.eyJ1IjoiYXF1YW1hbjc5MyIsImEiOiJjbTM2NW54cjIwMXYyMm1vY2tuY2M1cms2In0.xc_bpG78AzFn3nsvPy8ouw');
+
+
+Mapbox.setAccessToken(process.env.MAP_API_KEY || '');
 
 const MapScreen = () => {
+  // const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+
+  // useEffect(() => {
+  //   Geolocation.getCurrentPosition(
+  //     (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       setLocation({ latitude, longitude });
+  //       console.log(latitude, longitude);
+  //     },
+  //     (error) => console.log(error),
+  //     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+  //   );
+  // }, []);
+
   return (
-    <View style={styles.page}>
-      <View style={styles.container}>
-        <Mapbox.MapView style={styles.map} />
-      </View>
-    </View>
+    <>
+      <Mapbox.MapView style={{ flex: 1, width: '100%', height: '100%' }}>
+        <Mapbox.Camera followZoomLevel={14} followUserLocation={true} />
+        <Mapbox.LocationPuck puckBearingEnabled puckBearing="heading" pulsing={{ isEnabled: true }} />
+
+      <ShapeSource
+       id="jobs"
+       shape={featureCollection([point([-122.0854173, 37.4220013])])}>
+        <SymbolLayer
+          id="jobs"
+          style={{
+            iconImage: 'icon_partime', 
+            iconSize: 0.2,
+          }}
+          />
+      <Images images={{icon_partime}} />
+      </ShapeSource>
+      </Mapbox.MapView>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    height: 300,
-    width: 300,
-  },
-  map: {
-    flex: 1
-  }
-});
 
 export default MapScreen;
