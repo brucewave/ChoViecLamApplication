@@ -4,21 +4,26 @@ import {StatusBar} from 'react-native';
 import {Provider} from 'react-redux';
 import AppRouters from './src/navigators/AppRouters';
 import store from './src/redux/store';
+import { Host } from 'react-native-portalize';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const App = () => {
   return (
     <>
-      <Provider store={store}>
-        <StatusBar
+      <GestureHandlerRootView style={{flex: 1}}>
+        <Provider store={store}>
+          <StatusBar
           barStyle="dark-content"
           backgroundColor="transparent"
           translucent
         />
-
-        <NavigationContainer>
-          <AppRouters />
-        </NavigationContainer>
-      </Provider>
+        <Host>
+          <NavigationContainer>
+            <AppRouters />
+          </NavigationContainer>
+          </Host>
+        </Provider>
+      </GestureHandlerRootView>
     </>
   );
 };

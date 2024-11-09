@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { authSelector } from '../redux/reducers/authReducer';
 import ChoiceLocation from '../components/ChoiceLocation';
 import userAPI from '../apis/userApi';
+import { Image } from 'react-native';
 
 const initValues = {
   title: '',
@@ -53,7 +54,14 @@ const AddNewScreen = () => {
   const handleAddEvent = async () => {
     // const res = await userAPI.HandleUser('/get-all');
     // const resMe = await userAPI.HandleUser('/me');
-    // console.log('------------------------------res:---------------------------------------');
+    // const resUpload = await userAPI.HandleUser('/uploadImage', {
+    //   method: 'POST',
+    //   body: {       
+    //     file: fileSelected,
+    //   },
+    // });
+    console.log('------------------------------res:---------------------------------------');
+    console.log(eventData);
     // console.log(res);
     // console.log(resMe);
     // console.log(eventData);
@@ -62,12 +70,23 @@ const AddNewScreen = () => {
   return (
     <ContainerComponent isScroll>
       <SectionComponent>
-        <TextComponent text="Thêm công việc" />
+        <TextComponent text="Thêm công việc" title />
       </SectionComponent>
       <SectionComponent>
-        <SpaceComponent height={10} />
+        {eventData.photoUrl || (fileSelected) ? (
+        
+          <Image
+            source={{
+              uri: eventData.photoUrl ? eventData.photoUrl : fileSelected.path,
+            }}
+            style={{width: '100%', height: 250, marginBottom: 12}}
+            resizeMode="cover"
+          />
+        ) : (
+          <></>
+        )}
         <ButtonImagePicker
-          onSelect={(val: any) =>
+          onSelected={(val: any) =>
             val.type === 'url'
               ? handdleChangeValue('photoUrl', val.value as string)
               : handleFileSelected(val.value)

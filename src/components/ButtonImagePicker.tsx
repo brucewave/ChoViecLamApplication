@@ -1,129 +1,101 @@
-import {View, Text, Modal, TouchableOpacity} from 'react-native';
-import React, {ReactNode, useState} from 'react';
-import {
-  ButtonComponent,
-  InputComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from '.';
-import {Camera, Image, Link} from 'iconsax-react-native';
-import {appColors} from '../constants/appColors';
-import {fontFamilies} from '../constants/fontFamilies';
-import ImageCropPicker, {
-  ImageOrVideo,
-  Options,
-} from 'react-native-image-crop-picker';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useNavigation} from '@react-navigation/native';
+import { View, Text, TouchableOpacity } from 'react-native'
+import React, { useRef } from 'react'
+import { ButtonComponent, RowComponent, SpaceComponent } from '.'
+import { Modalize } from 'react-native-modalize'
+import { Portal } from 'react-native-portalize'
+import TextComponent from './TextComponent'
+import { Camera, Image } from 'iconsax-react-native'
+import { appColors } from '../constants/appColors'
+import { fontFamilies } from '../constants/fontFamilies'
+import ImageCropPicker, { Options } from 'react-native-image-crop-picker'
+import { ImageOrVideo } from 'react-native-image-crop-picker'
+
+
 
 interface Props {
-  onSelect: (val: {type: 'url' | 'file'; value: string | ImageOrVideo}) => void;
+  onSelected: (val: {
+    type: 'camera' | 'gallery',
+    value: string | ImageOrVideo
+  }) => void
+}
+
+
+const options: Options = {
+  mediaType: 'photo',
+  cropping: true,
 }
 
 const ButtonImagePicker = (props: Props) => {
-  const {onSelect} = props;
-  const navigation = useNavigation();
+  const { onSelected } = props
 
-  const [imageUrl, setImageUrl] = useState('');
-  const [isVisibleModalAddUrl, setIsVisibleModalAddUrl] = useState(false);
 
-  const options: Options = {
-    cropping: true,
-    mediaType: 'photo',
-  };
+  const modalizeRef = useRef<Modalize>();
+
+
+
+  const choiceImage = [
+    {
+      key: 'camera',
+      title: 'Chụp ảnh',
+      icon: <Camera size={24} color={appColors.text}/>
+    },
+    {
+      key: 'gallery',
+      title: 'Chọn từ thư viện',
+      icon: <Image size={24} color={appColors.text}/>
+    }
+  ]
+
+  const renderItem = (item: {icon: React.ReactNode, title: string, key: string}) => {
+    return (
+      <RowComponent key={item.key} styles={{ paddingVertical: 10 }}
+      onPress = {() => handleChoiceImage(item.key)}>
+          {item.icon}
+        <SpaceComponent width={10} />
+        <TextComponent text={item.title} flex={1} title font={fontFamilies.medium}/>
+      </RowComponent>
+    )
+  }
 
   const handleChoiceImage = (key: string) => {
-    switch (key) {
-      case 'library':
-        ImageCropPicker.openPicker(options).then(res => {
-          onSelect({type: 'file', value: res});
-        }).catch(error => {
-          console.error('Error picking image from library:', error);
-        });
-        break;
-
-      case 'camera':
-        ImageCropPicker.openCamera(options).then(res => {
-          onSelect({type: 'file', value: res});
-        }).catch(error => {
-          console.error('Error opening camera:', error);
-        });
-        break;
-
-      case 'url':
-        setIsVisibleModalAddUrl(true);
-        break;
-
-      default:
-        break;
+    if (key === 'camera') {
+      ImageCropPicker.openCamera(options).then((res) => {
+        onSelected({
+          type: 'camera',
+          value: res
+        })
+      })
+    } else {
+      ImageCropPicker.openPicker(options).then((res) => {
+        onSelected({
+          type: 'gallery',
+          value: res
+        })
+      })
     }
-  };
+  }
+
 
   return (
-    <View style={{marginBottom: 20}}>
-      <ButtonComponent
-        text="Upload image"
-        // onPress={() => navigation.navigate('ImagePickerOverlay', {onSelect})}
+    <View style={{ marginBottom: 20 }}>
+      <ButtonComponent 
+        text="Chọn ảnh"
         type="link"
+        onPress={() => modalizeRef.current?.open()}
       />
-
-      <Modal
-        visible={isVisibleModalAddUrl}
-        statusBarTranslucent
-        transparent
-        animationType="slide">
-        <View
-          style={{
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              backgroundColor: appColors.white,
-              margin: 20,
-              borderRadius: 12,
-              width: '90%',
-              padding: 20,
-            }}>
-            <RowComponent justify="flex-end">
-              <TouchableOpacity
-                onPress={() => {
-                  setImageUrl('');
-                  setIsVisibleModalAddUrl(false);
-                }}>
-                <AntDesign name="close" size={24} color={appColors.text} />
-              </TouchableOpacity>
-            </RowComponent>
-
-            <TextComponent text="Image URL" title size={18} />
-            <InputComponent
-              placeholder="URL"
-              value={imageUrl}
-              onChange={val => setImageUrl(val)}
-              allowClear
-            />
-            <RowComponent justify="flex-end">
-              <ButtonComponent
-                type="link"
-                text="Agree"
-                onPress={() => {
-                  if (imageUrl) {
-                    onSelect({type: 'url', value: imageUrl});
-                    setImageUrl('');
-                    setIsVisibleModalAddUrl(false);
-                  } else {
-                    console.error('Please enter a valid URL');
-                  }
-                }}
-              />
-            </RowComponent>
+      <Portal>
+        <Modalize adjustToContentHeight ref={modalizeRef} handlePosition="inside" >
+          <View style={{ marginVertical: 30, paddingHorizontal: 20 }}>
+            {
+              choiceImage.map((item) => (
+                renderItem(item)
+              ))
+            }
           </View>
-        </View>
-      </Modal>
+        </Modalize>
+      </Portal>
     </View>
-  );
-};
+  )
+}
 
-export default ButtonImagePicker;
+export default ButtonImagePicker
