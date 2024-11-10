@@ -15,6 +15,7 @@ import ChoiceLocation from './ChoiceLocation';
 import DateTimePicker from './DateTimePicker';
 import ButtonImagePicker from './ButtonImagePicker';
 import MapComponent from './MapComponent';
+import DropdownPicker from './DropdownPicker';
 export {
   MapComponent,
   ButtonImagePicker,
@@ -33,4 +34,5 @@ export {
   AvatarGroup,
   ChoiceLocation,
   DateTimePicker,
+  DropdownPicker,
 };

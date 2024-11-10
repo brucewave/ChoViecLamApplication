@@ -12,7 +12,7 @@ import { appInfo } from '../constants/appInfos';
 import Geolocation from '@react-native-community/geolocation';
 import { AddressModel } from '../models/AddressModel';
 import Geocoder from 'react-native-geocoding';
-
+import { AxiosRequestConfig } from 'axios';
 
 Geocoder.init(process.env.MAP_API_KEY as string);
 interface Props {
@@ -48,17 +48,28 @@ const ModalLocation = (props: Props) => {
   }, []);
 
   const handleSearchLocation = async () => {
-    const apiKey = process.env.MAP_API_KEY;
-    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=${apiKey}`;
+    const apiKey = process.env.MAP_API_KEY || 'lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As';
+    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
+
     try {
       setIsLoading(true);
-      const res = await axios.get(api);
-      if (res && res.data && res.status === 200) {
-        setLocations(res.data.items);
+      const response = await fetch(api);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setIsLoading(false);
+
+      const data = await response.json();
+
+      if (data && data.items) {
+        setLocations(data.items);
+      } else {
+        console.log("Không có dữ liệu trả về từ API");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Lỗi khi tìm kiếm địa chỉ:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

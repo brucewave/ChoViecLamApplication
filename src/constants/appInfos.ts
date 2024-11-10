@@ -11,6 +11,11 @@ export const appInfo = {
   //Mang cong ty
   // BASE_URL: 'http://192.168.110.15:3001',
 
+  //OyeCoffee
+  // BASE_URL: 'http://172.26.29.213:3001',
+
+  //Mang tu phat
+  // BASE_URL: 'http://172.20.10.10:3001',
   //Mang nha
   BASE_URL: 'http://192.168.0.105:3001',
 

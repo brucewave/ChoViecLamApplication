@@ -1,12 +1,20 @@
 import {View, Text} from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SelectModel } from '../models/SelectModel';
-import { ButtonComponent, ButtonImagePicker, ContainerComponent, DateTimePicker, InputComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '../components';
+import { ButtonComponent, ButtonImagePicker, ContainerComponent, DateTimePicker, DropdownPicker, InputComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '../components';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../redux/reducers/authReducer';
 import ChoiceLocation from '../components/ChoiceLocation';
 import userAPI from '../apis/userApi';
 import { Image } from 'react-native';
+import { Validate } from '../utils/validate';
+import { appColors } from '../constants/appColors';
+import imageAPI from '../apis/imageApi';
+import axios, { AxiosRequestConfig } from 'axios';
+import eventAPI from '../apis/eventApi';
+import { EventModel } from '../models/EventModel';
+import jobAPI from '../apis/jobApi';
+import { JobModel } from '../models/JobModel';  
 
 const initValues = {
   title: '',
@@ -44,6 +52,7 @@ const AddNewScreen = () => {
     items[key] = value;
 
     setEventData(items);
+    console.log(eventData); 
   };
 
 
@@ -51,20 +60,73 @@ const AddNewScreen = () => {
     setFileSelected(val);
     handdleChangeValue('photoUrl', val.path);
   };
+
+
+  useEffect(() => {
+    const mess = Validate.EventValidation(eventData);
+    setErrorsMess(mess);
+  }, [eventData]);
+
+
+  
+  
   const handleAddEvent = async () => {
-    // const res = await userAPI.HandleUser('/get-all');
-    // const resMe = await userAPI.HandleUser('/me');
-    // const resUpload = await userAPI.HandleUser('/uploadImage', {
-    //   method: 'POST',
-    //   body: {       
-    //     file: fileSelected,
-    //   },
-    // });
-    console.log('------------------------------res:---------------------------------------');
-    console.log(eventData);
-    // console.log(res);
-    // console.log(resMe);
-    // console.log(eventData);
+    console.log('-------------------');
+    console.log(eventData.photoUrl);
+    
+    if (eventData.photoUrl) {
+      const upload = async () => {
+        const uri = eventData.photoUrl;
+        const type = 'image/jpg';
+        const name = uri.split('/').pop();
+
+        const formData = new FormData();
+        formData.append('image', { uri, type, name });
+
+        const config = {
+          method: 'post',
+          url: 'http://192.168.0.105:3001/upload/uploadImage',
+          data: formData,
+        };
+
+        try {
+          const response = await axios.request(config as AxiosRequestConfig);
+
+          if (response.status === 200) {
+            console.log('Upload thành công:', response.data);
+            setEventData((prevData: any) => ({
+              ...prevData,
+              photoUrl: response.data.data.secure_url,
+            }));
+            // console.log('Link ảnh:', response.data.data.secure_url);
+            handlePushJob(eventData);
+          }
+        } catch (error: any) {
+          console.error('Lỗi khi tải ảnh lên:', error.response ? error.response.data : error.message);
+        }
+      };
+      await upload();
+    }
+  };
+
+  const handlePushJob = async (job: JobModel) => {
+    console.log(job);
+    const api = `http://192.168.0.105:3001/jobs/addNew`;
+    try {
+      const response = await jobAPI.HandleJob(api, job, 'post');
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const handleLocation = (val: any) => {
+    const items = {...eventData};
+    items.locationAddress = val.address;
+    items.position = val.postion;
+
+    setEventData(items);
   };
 
   return (
@@ -107,6 +169,28 @@ const AddNewScreen = () => {
           value={eventData.description}
           onChange={value => handdleChangeValue('description', value)}
         />
+        <SectionComponent>
+          <DropdownPicker selected={eventData.category} values={[
+            {
+            label: 'Bán thời gian',
+            value: 'partime',
+          },
+          {
+            label: 'Toàn thời gian',
+            value: 'fulltime',
+          },
+          {
+            label: 'Thời vụ',
+            value: 'seasonal',
+          },
+          {
+            label: 'Gấp',
+            value: 'urgent',
+            },
+            ]}
+          onSelect={value => handdleChangeValue('category', value)}
+        />
+        </SectionComponent>
       </SectionComponent>
       <SectionComponent>
         <InputComponent
@@ -124,13 +208,25 @@ const AddNewScreen = () => {
         <DateTimePicker label="Ngày đăng" type="date" onSelect={value => handdleChangeValue('date', value)} />
       </SectionComponent>
       <SectionComponent>
-        <ChoiceLocation />
+        <ChoiceLocation onSelect={value => handleLocation(value)} />
       </SectionComponent>
       <SectionComponent>
         <InputComponent placeholder="Lương" type="number-pad" allowClear value={eventData.price} onChange={value => handdleChangeValue('price', value)} />
       </SectionComponent>
+      {errorsMess.length > 0 && (
+        <SectionComponent>
+          {errorsMess.map(mess => (
+            <TextComponent
+              text={mess}
+              key={mess}
+              color={appColors.danger}
+              styles={{marginBottom: 12}}
+            />
+          ))}
+        </SectionComponent>
+      )}
       <SectionComponent>
-        <ButtonComponent text="Thêm công việc" onPress={handleAddEvent} type="primary" />
+        <ButtonComponent disable={errorsMess.length > 0} text="Thêm công việc" onPress={handleAddEvent} type="primary" />
       </SectionComponent>
     </ContainerComponent>
   );
