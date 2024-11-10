@@ -111,7 +111,7 @@ const AddNewScreen = () => {
 
   const handlePushJob = async (job: JobModel) => {
     console.log(job);
-    const api = `http://192.168.0.105:3001/jobs/addNew`;
+    const api = `/addNew`;
     try {
       const response = await jobAPI.HandleJob(api, job, 'post');
       console.log(response);
