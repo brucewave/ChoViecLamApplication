@@ -34,10 +34,44 @@ import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { AddressModel } from '../../models/AddressModel';
 import Geocoder from 'react-native-geocoding';
+import jobAPI from '../../apis/jobApi';
 
 const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [currentLocation, setCurrentLocation] = useState<AddressModel>();
+  const [jobs, setJobs] = useState([]);
+  
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await jobAPI.GetJobs(); // Gọi hàm GetJobs
+        console.log('Danh sách công việc:', response.data); // In ra danh sách công việc
+
+        // Chuyển đổi dữ liệu nhận được thành định dạng mẫu
+        const formattedJobs = response.data.map((job: any) => ({
+          title: job.title,
+          description: job.description || 'Không có mô tả', // Nếu không có mô tả, hiển thị thông báo
+          location: {
+            title: job.locationTitle || 'Không có tiêu đề địa điểm', // Tiêu đề địa điểm
+            address: job.locationAddress || 'Không có địa chỉ', // Địa chỉ
+          },
+          imageUrl: job.photoUrl || '', // URL ảnh
+          users: job.users || [], // Danh sách người dùng
+          authorId: job._id, // ID tác giả
+          startAt: job.startAt, // Thời gian bắt đầu
+          endAt: job.endAt, // Thời gian kết thúc
+          date: job.date, // Ngày
+        }));
+
+        setJobs(formattedJobs); // Lưu danh sách công việc đã định dạng vào state
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách công việc:', error); // In ra lỗi nếu có
+      }
+    };
+
+    fetchJobs(); // Gọi hàm
+  }, []);
+  
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
       if (position.coords) {
@@ -46,26 +80,30 @@ const HomeScreen = ({navigation}: any) => {
           long: position.coords.longitude,
         });
       }
-    });
+    },
+  );
   }, []);
 
 
   const auth = useSelector(authSelector);
 
 
+
+
   const getCoordinatesFromAddress = async (address: string) => {
-    const apiKey = process.env.MAP_API_KEY;
+    const apiKey = process.env.GO_MAP_API_KEY;
     const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
   
     try {
       const response = await axios.get(apiUrl);
+
       if (response.data && response.data.results.length > 0) {
         const result = response.data.results[0];
         const location = result.geometry.location;
         const formattedAddress = result.formatted_address;
         const addressComponents = result.address_components;
-        
-        reverseGeoCode({ lat: location.lat, long: location.lng });
+        // reverseGeoCode({ lat: location.lat, long: location.lng });
+
 
       } else {
         console.log('No results found for the address.');
@@ -80,19 +118,46 @@ const HomeScreen = ({navigation}: any) => {
   }, []);
 
 
-
-
-
   const reverseGeoCode = async ({ lat, long }: { lat: number; long: number }) => {
-    const apiKey = process.env.MAP_API_KEY;
+    const apiKey = process.env.GO_MAP_API_KEY;
     const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?latlng=${lat},${long}&key=${apiKey}`;
   
     try {
       const res = await axios.get(apiUrl);
+      console.log('----------------alooo--------------');
+      console.log('Địa chỉ', res.data);
   
       if (res.data && res.data.results.length > 0) {
         const result = res.data.results[0];
         const formattedAddress = result.formatted_address;
+
+        // Cập nhật currentLocation với formatted_address
+        setCurrentLocation({
+          address: {
+            city: '', // Bạn có thể thêm logic để lấy city nếu cần
+            countryCode: '', 
+            countryName: '', 
+            county: '', 
+            district: '', 
+            label: '', 
+            postalCode: '', 
+            street: '', 
+          },
+          distance: 0, 
+          id: '', 
+          mapView: {
+            east: 0, 
+            north: 0, 
+            south: 0,
+            west: 0, 
+          },
+          position: {
+            lat: lat,
+            lng: long,
+          },
+          resultType: '',
+          title: formattedAddress,
+        });
       } else {
         console.log('No results found for the coordinates.');
       }
@@ -153,7 +218,7 @@ const HomeScreen = ({navigation}: any) => {
 
               {currentLocation && (
                 <TextComponent
-                text={`${currentLocation.address.city}, ${currentLocation.address.county}`}
+                text={currentLocation.title}
                 flex={0}
                 color={appColors.white}
                 font={fontFamilies.medium}
@@ -238,17 +303,25 @@ const HomeScreen = ({navigation}: any) => {
            marginTop: Platform.OS === 'ios' ? 22 : 18,
          },
        ]}>
-       <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 24}}>
-         <TabBarComponent title="Việc Vừa Đăng" onPress={() => {}} />
-         <FlatList
-           showsHorizontalScrollIndicator={false}
-           horizontal
-           data={Array.from({length: 5})}
-           renderItem={({item, index}) => (
-             <EventItem key={`event${index}`} item={itemEvent} type="card" />
-           )}
-         />
-       </SectionComponent>
+        <SectionComponent styles={{ paddingHorizontal: 0, paddingTop: 24 }}>
+        <TabBarComponent title="Việc Vừa Đăng" onPress={() => {}} />
+          
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          data={jobs} // Sử dụng danh sách công việc đã định dạng từ state
+          
+          // keyExtractor={(item) => item.authorId} // Sử dụng authorId làm key
+          renderItem={({ item }) => (
+            <EventItem
+            
+              // key={item.authorId} // Đảm bảo key là duy nhất
+              item={item} // Truyền item đã định dạng vào EventItem
+              type="card" // Loại hiển thị
+            />
+          )}
+        />
+      </SectionComponent>
        <SectionComponent>
          <ImageBackground 
            source={require('../../assets/images/invite-image.png')}

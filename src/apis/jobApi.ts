@@ -11,6 +11,11 @@ class JobAPI {
       data,
     });
   };
+  GetJobs = async () => {
+    return await axiosClient(`/jobs`, {
+      method: 'get',
+    });
+  };
 }
 
 const jobAPI = new JobAPI();

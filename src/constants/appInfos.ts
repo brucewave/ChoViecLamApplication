@@ -14,6 +14,9 @@ export const appInfo = {
   //OyeCoffee
   // BASE_URL: 'http://172.26.29.213:3001',
 
+  //Mang 24h
+  // BASE_URL: 'http://192.168.1.56:3001',
+
   //Mang tu phat
   // BASE_URL: 'http://172.20.10.10:3001',
   //Mang nha

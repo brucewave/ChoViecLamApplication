@@ -15,6 +15,7 @@ import eventAPI from '../apis/eventApi';
 import { EventModel } from '../models/EventModel';
 import jobAPI from '../apis/jobApi';
 import { JobModel } from '../models/JobModel';  
+import { appInfo } from '../constants/appInfos';
 
 const initValues = {
   title: '',
@@ -99,7 +100,10 @@ const AddNewScreen = () => {
               photoUrl: response.data.data.secure_url,
             }));
             // console.log('Link ảnh:', response.data.data.secure_url);
-            handlePushJob(eventData);
+            handlePushJob({
+              ...eventData,
+              photoUrl: response.data.data.secure_url,
+            });
           }
         } catch (error: any) {
           console.error('Lỗi khi tải ảnh lên:', error.response ? error.response.data : error.message);
@@ -207,9 +211,9 @@ const AddNewScreen = () => {
         </RowComponent>
         <DateTimePicker label="Ngày đăng" type="date" onSelect={value => handdleChangeValue('date', value)} />
       </SectionComponent>
-      <SectionComponent>
+      {/* <SectionComponent>
         <ChoiceLocation onSelect={value => handleLocation(value)} />
-      </SectionComponent>
+      </SectionComponent> */}
       <SectionComponent>
         <InputComponent placeholder="Lương" type="number-pad" allowClear value={eventData.price} onChange={value => handdleChangeValue('price', value)} />
       </SectionComponent>
