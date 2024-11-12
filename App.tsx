@@ -6,6 +6,7 @@ import AppRouters from './src/navigators/AppRouters';
 import store from './src/redux/store';
 import { Host } from 'react-native-portalize';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         <Host>
           <NavigationContainer>
             <AppRouters />
+            <Toast />
           </NavigationContainer>
           </Host>
         </Provider>

@@ -178,7 +178,7 @@ const EventDetail = ({navigation, route}: any) => {
               <RowComponent styles={{marginBottom: 20}}>
                 <Image
                   source={{
-                    uri: 'https://gamek.mediacdn.vn/133514250583805952/2022/5/18/photo-1-16528608926331302726659.jpg',
+                    uri: 'https://www.asirox.com/wp-content/uploads/2022/07/pngtree-user-vector-avatar-png-image_1541962.jpeg',
                   }}
                   style={{
                     width: 48,

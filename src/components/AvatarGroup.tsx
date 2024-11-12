@@ -11,7 +11,7 @@ interface Props {
 const AvatarGroup = (props: Props) => {
   const {size} = props;
   const photoUrl =
-    'https://gamek.mediacdn.vn/133514250583805952/2022/5/18/photo-1-16528608926331302726659.jpg';
+    'https://cdn-icons-png.flaticon.com/512/6915/6915987.png';
   return (
     <RowComponent justify="flex-start" styles={{marginVertical: 12}}>
       {Array.from({length: 3}).map((item, index) => (

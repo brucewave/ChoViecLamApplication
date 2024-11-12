@@ -98,7 +98,7 @@ const ModalLocation = (props: Props) => {
         return null;
       }
     } catch (error) {
-      console.error('Lỗi khi lấy thông tin địa chỉ:', error);
+      // console.error('Lỗi khi lấy thông tin địa chỉ:', error);
       return null;
     }
   };

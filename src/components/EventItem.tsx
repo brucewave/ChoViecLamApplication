@@ -19,10 +19,13 @@ import {useNavigation} from '@react-navigation/native';
 interface Props {
   item: EventModel;
   type: 'card' | 'list';
+  imageUrl: string;
 }
 
+
+
 const EventItem = (props: Props) => {
-  const {item, type} = props;
+  const {item, type, imageUrl} = props;
 
   const navigation: any = useNavigation();
 
@@ -33,7 +36,7 @@ const EventItem = (props: Props) => {
       onPress={() => navigation.navigate('EventDetail', {item})}>
       <ImageBackground
         style={{flex: 1, marginBottom: 12, height: 131, padding: 10}}
-        source={require('../assets/images/event-image.png')}
+        source={imageUrl && imageUrl.trim() !== '' ? { uri: imageUrl } : require('../assets/images/event-image.png')} // Sử dụng ảnh mặc định nếu imageUrl không hợp lệ
         imageStyle={{
           resizeMode: 'cover',
           borderRadius: 12,
@@ -44,18 +47,18 @@ const EventItem = (props: Props) => {
               color={appColors.danger}
               font={fontFamilies.bold}
               size={18}
-              text="10"
+              text={item.day}
             />
             <TextComponent
               color={appColors.danger}
               font={fontFamilies.semiBold}
               size={10}
-              text="JUNE"
+              text={item.month}
             />
           </CardComponent>
           <CardComponent styles={[globalStyles.noSpaceCard]} color="#ffffffB3">
             <MaterialIcons
-              name="bookmark"
+              name="favorite"
               color={appColors.danger}
               size={22}
             />

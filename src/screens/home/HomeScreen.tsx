@@ -12,6 +12,7 @@ import {
   StatusBar,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
@@ -40,20 +41,20 @@ const HomeScreen = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [currentLocation, setCurrentLocation] = useState<AddressModel>();
   const [jobs, setJobs] = useState([]);
-  
+  const [refresh, setRefresh] = useState(false);
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await jobAPI.GetJobs(); // Gọi hàm GetJobs
-        console.log('Danh sách công việc:', response.data); // In ra danh sách công việc
+        const response = await jobAPI.GetJobs(); 
+        // console.log('Danh sách công việc:', response.data); 
 
-        // Chuyển đổi dữ liệu nhận được thành định dạng mẫu
         const formattedJobs = response.data.map((job: any) => ({
           title: job.title,
-          description: job.description || 'Không có mô tả', // Nếu không có mô tả, hiển thị thông báo
+          description: job.description || 'Không có mô tả', 
           location: {
-            title: job.locationTitle || 'Không có tiêu đề địa điểm', // Tiêu đề địa điểm
-            address: job.locationAddress || 'Không có địa chỉ', // Địa chỉ
+            title: job.locationTitle || 'Không có tiêu đề địa điểm', 
+            address: job.locationAddress || 'Không có địa chỉ', 
           },
           imageUrl: job.photoUrl || '', // URL ảnh
           users: job.users || [], // Danh sách người dùng
@@ -63,14 +64,15 @@ const HomeScreen = ({navigation}: any) => {
           date: job.date, // Ngày
         }));
 
-        setJobs(formattedJobs); // Lưu danh sách công việc đã định dạng vào state
+        setJobs(formattedJobs.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())); 
       } catch (error) {
-        console.error('Lỗi khi lấy danh sách công việc:', error); // In ra lỗi nếu có
+        console.error('Lỗi khi lấy danh sách công việc:', error); 
       }
     };
 
     fetchJobs(); // Gọi hàm
   }, []);
+
   
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -184,10 +186,19 @@ const HomeScreen = ({navigation}: any) => {
     date: Date.now(),
   };
 
+
+  const pullToRefresh = () => {
+    setRefresh(true);
+    setTimeout(() => {
+      setRefresh(false);
+    }, 3000);
+
+  };
+
   return (
     <View style={[globalStyles.container]}>
       <StatusBar barStyle={'light-content'} />
-
+      
       <View
         style={{
           backgroundColor: appColors.primary,
@@ -296,6 +307,9 @@ const HomeScreen = ({navigation}: any) => {
         </View>
       </View>
       <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refresh} onRefresh={pullToRefresh} />
+      }
        showsVerticalScrollIndicator={false}
        style={[
          {
@@ -307,19 +321,27 @@ const HomeScreen = ({navigation}: any) => {
         <TabBarComponent title="Việc Vừa Đăng" onPress={() => {}} />
           
         <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refresh} onRefresh={pullToRefresh} />
+        }
           showsHorizontalScrollIndicator={false}
           horizontal
-          data={jobs} // Sử dụng danh sách công việc đã định dạng từ state
+          data={jobs} 
           
-          // keyExtractor={(item) => item.authorId} // Sử dụng authorId làm key
-          renderItem={({ item }) => (
-            <EventItem
-            
-              // key={item.authorId} // Đảm bảo key là duy nhất
-              item={item} // Truyền item đã định dạng vào EventItem
-              type="card" // Loại hiển thị
-            />
-          )}
+          
+          renderItem={({ item }) => {
+            const eventDate = new Date(item.date); 
+            const day = eventDate.getDate(); 
+            const month = eventDate.toLocaleString('default', { month: 'short' }).toUpperCase(); 
+            // console.log('item ne: ', item);
+            return (
+              <EventItem
+                imageUrl={item.imageUrl}
+                item={{ ...item, day, month }} // Thêm day và month vào item
+                type="card"
+              />
+            );
+          }}
         />
       </SectionComponent>
        <SectionComponent>
@@ -358,9 +380,19 @@ const HomeScreen = ({navigation}: any) => {
            showsHorizontalScrollIndicator={false}
            horizontal
            data={Array.from({length: 5})}
-           renderItem={({item, index}) => (
-             <EventItem key={`event${index}`} item={itemEvent} type="card" />
-           )}
+           renderItem={({item, index}) => {
+             const eventDate = new Date(itemEvent.date);
+             const day = eventDate.getDate();
+             const month = eventDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+
+             return (
+               <EventItem key={`event${index}`} 
+                 imageUrl={itemEvent.imageUrl} 
+                 item={{ ...itemEvent, day, month }}
+                 type="card" 
+               />
+             );
+           }}
          />
        </SectionComponent>
       </ScrollView>
