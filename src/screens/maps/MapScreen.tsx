@@ -1,13 +1,19 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
-import Mapbox, { ShapeSource, SymbolLayer, Camera, Images, CircleLayer } from '@rnmapbox/maps';
+import React, { useState } from 'react';
+import Mapbox, { ShapeSource, SymbolLayer, Camera, Images, CircleLayer, LineLayer } from '@rnmapbox/maps';
 import Geolocation from '@react-native-community/geolocation';
 import { featureCollection, point } from '@turf/helpers';
 import icon_partime from '../../assets/images/icon_partime.png';
+import routeResponse from '../../../data/route.json';
+import { getDirection } from '../../../services/direction';
+import { OnPressEvent } from '@rnmapbox/maps/lib/typescript/src/types/OnPressEvent';
+
 
 Mapbox.setAccessToken(process.env.MAP_API_KEY || '');
 
 const MapScreen = () => {
+  const [direction, setDirection] = useState();
+
   const jobLocations = [
     point([-122.0854173, 37.4220013]),
     point([-122.085, 37.422]),
@@ -25,6 +31,34 @@ const MapScreen = () => {
     point([-122.0851, 37.4219]),
   ];
 
+
+
+  const directionCoordinates = direction?.routes?.[0].geometry.coordinates;
+  
+
+  const onPointPress = async (event: OnPressEvent) => {
+    Geolocation.getCurrentPosition(
+        async (position) => {
+            const myLocation = {
+                longitude: position.coords.longitude,
+                latitude: position.coords.latitude,
+            };
+            // console.log("Vị trí hiện tại là: ", myLocation);
+
+            const newDirection = await getDirection(
+                [myLocation.longitude, myLocation.latitude], // Vị trí hiện tại
+                [event.coordinates.longitude, event.coordinates.latitude] // Vị trí điểm được nhấn
+            );
+            setDirection(newDirection);
+        },
+        (error) => {
+            console.error("Lỗi khi lấy vị trí hiện tại: ", error);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  }
+
+
   return (
     <Mapbox.MapView style={{ flex: 1, width: '100%', height: '100%' }}>
       <Mapbox.Camera followZoomLevel={14} followUserLocation={true} />
@@ -33,7 +67,7 @@ const MapScreen = () => {
       <ShapeSource 
       id="jobs" 
       cluster
-      onPress={(e) => console.log(JSON.stringify(e,null,2))}
+      onPress={onPointPress}
       clusterRadius={50} 
       shape={featureCollection(jobLocations)}>
         
@@ -74,6 +108,24 @@ const MapScreen = () => {
         {/* Load icon for individual job markers */}
         <Images images={{ icon_partime }} />
       </ShapeSource>
+
+      {directionCoordinates && (
+        <ShapeSource 
+        id="routeSource" 
+        lineMetrics 
+        shape={{
+            properties: {},
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: directionCoordinates,
+            },
+          }}>
+          <LineLayer id="exampleLineLayer" style={{ lineColor: '#0000FF', lineWidth: 2 }} />
+        </ShapeSource>
+      )}
+
+
     </Mapbox.MapView>
   );
 };
