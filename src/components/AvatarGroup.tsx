@@ -6,15 +6,18 @@ import {fontFamilies} from '../constants/fontFamilies';
 
 interface Props {
   size?: number;
+  userIds: string[];
 }
 
 const AvatarGroup = (props: Props) => {
-  const {size} = props;
+  const {size, userIds} = props;
   const photoUrl =
     'https://cdn-icons-png.flaticon.com/512/6915/6915987.png';
   return (
     <RowComponent justify="flex-start" styles={{marginVertical: 12}}>
-      {Array.from({length: 3}).map((item, index) => (
+      {
+        userIds.length > 0  && ( <>
+         {Array.from({length: 3}).map((item, index) => (
         <Image
           key={`img${index}`}
           source={{uri: photoUrl}}
@@ -33,8 +36,10 @@ const AvatarGroup = (props: Props) => {
         text="+20 Going"
         size={12 + (size ? (size - 24) / 5 : 0)}
         color={appColors.primary}
-        font={fontFamilies.semiBold}
-      />
+          font={fontFamilies.semiBold}
+        />
+      </>
+      )}
     </RowComponent>
   );
 };

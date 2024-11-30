@@ -1,132 +1,184 @@
-import { View, Text, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
-import Mapbox, { ShapeSource, SymbolLayer, Camera, Images, CircleLayer, LineLayer } from '@rnmapbox/maps';
-import Geolocation from '@react-native-community/geolocation';
-import { featureCollection, point } from '@turf/helpers';
-import icon_partime from '../../assets/images/icon_partime.png';
-import routeResponse from '../../../data/route.json';
-import { getDirection } from '../../../services/direction';
-import { OnPressEvent } from '@rnmapbox/maps/lib/typescript/src/types/OnPressEvent';
+import GeoLocation from '@react-native-community/geolocation';
+import {ArrowLeft2} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
+import {FlatList, StatusBar, TouchableOpacity, View} from 'react-native';
+import MapView, {Marker} from 'react-native-maps';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import eventAPI from '../../apis/eventApi';
+import {
+  CardComponent,
+  CategoriesList,
+  EventItem,
+  InputComponent,
+  MakerCustom,
+  RowComponent,
+  SpaceComponent,
+} from '../../components';
+import {appColors} from '../../constants/appColors';
+import {appInfo} from '../../constants/appInfos';
+import {EventModel} from '../../models/EventModel';
+import {globalStyles} from '../../styles/globalStyles';
+import {useIsFocused} from '@react-navigation/native';
+import {LoadingModal} from '../../modals';
+import jobAPI from '../../apis/jobApi';
+import { KnifeFork_Color } from '../../assets/svgs';
+
+const MapScreen = ({navigation}: any) => {
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    long: number;
+  }>();
+  const [events, setEvents] = useState<EventModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const isFocused = useIsFocused();
 
 
-Mapbox.setAccessToken(process.env.MAP_API_KEY || '');
-
-const MapScreen = () => {
-  const [direction, setDirection] = useState();
-
-  const jobLocations = [
-    point([-122.0854173, 37.4220013]),
-    point([-122.085, 37.422]),
-    point([-122.086, 37.423]),
-    point([-122.084, 37.421]),
-    point([-122.0855, 37.4225]),
-    point([-122.0852, 37.4222]),
-    point([-122.0858, 37.4218]),
-    point([-122.0865, 37.4223]),
-    point([-122.0845, 37.4215]),
-    point([-122.0853, 37.4231]),
-    point([-122.0862, 37.4235]),
-    point([-122.0848, 37.4228]),
-    point([-122.0857, 37.4212]),
-    point([-122.0851, 37.4219]),
-  ];
-
-
-
-  const directionCoordinates = direction?.routes?.[0].geometry.coordinates;
-  
-
-  const onPointPress = async (event: OnPressEvent) => {
-    Geolocation.getCurrentPosition(
-        async (position) => {
-            const myLocation = {
-                longitude: position.coords.longitude,
-                latitude: position.coords.latitude,
-            };
-            // console.log("Vị trí hiện tại là: ", myLocation);
-
-            const newDirection = await getDirection(
-                [myLocation.longitude, myLocation.latitude], // Vị trí hiện tại
-                [event.coordinates.longitude, event.coordinates.latitude] // Vị trí điểm được nhấn
-            );
-            setDirection(newDirection);
-        },
-        (error) => {
-            console.error("Lỗi khi lấy vị trí hiện tại: ", error);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+  useEffect(() => {
+    GeoLocation.getCurrentPosition(
+      (position: any) => {
+        if (position.coords) {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            long: position.coords.longitude,
+          });
+        }
+      },
+      (error: any) => {
+        console.log(error);
+      },
+      {},
     );
-  }
+  }, []);
+  
+  useEffect(() => {
+    currentLocation && getNearbyEvents();
+  }, [currentLocation]);
 
+  const getNearbyEvents = async () => {
+    try {
+      const api = `/getEvents?lat=${currentLocation?.lat}&long=${currentLocation?.long}`;
+      const res = await jobAPI.HandleJob(api, null, 'get');
+      try{
+        console.log('res: ', res.data);
+        setEvents(res.data);
+      } catch (error) {
+        console.log('No data received from API');
+      }
+    } catch (error) {
+      console.log('Error fetching events: ', error);
+    }
+  };
 
   return (
-    <Mapbox.MapView style={{ flex: 1, width: '100%', height: '100%' }}>
-      <Mapbox.Camera followZoomLevel={14} followUserLocation={true} />
-      <Mapbox.LocationPuck puckBearingEnabled puckBearing="heading" pulsing={{ isEnabled: true }} />
+    <View style={{flex: 1}}>
+      <StatusBar barStyle={'dark-content'} />
 
-      <ShapeSource 
-      id="jobs" 
-      cluster
-      onPress={onPointPress}
-      clusterRadius={50} 
-      shape={featureCollection(jobLocations)}>
-        
-        <CircleLayer 
-          id="clusters"
-          filter={['has', 'point_count']}
+      {currentLocation ? (
+        <MapView
           style={{
-            circlePitchAlignment: 'map',
-            circleColor: '#FF0000', 
-            circleRadius: 20,
-            circleOpacity: 1,
-            circleStrokeWidth: 2,
-            circleStrokeColor: 'white',
+            width: appInfo.sizes.WIDTH,
+            height: appInfo.sizes.HEIGHT,
           }}
-        />
-
-        <SymbolLayer
-          id="clusters-count"
-          filter={['has', 'point_count']}
-          style={{
-            textField: ['get', 'point_count'], 
-            textColor: 'white',
-            textSize: 12,
-            textPitchAlignment: 'map',
+          // showsMyLocationButton
+          showsUserLocation
+          initialRegion={{
+            latitude: currentLocation.lat,
+            longitude: currentLocation.long,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
           }}
-        />
-
-        {/* Symbol layer for individual job markers */}
-        <SymbolLayer
-          id="job-icons"
-          filter={['!', ['has', 'point_count']]}
-          style={{
-            iconImage: 'icon_partime', 
-            iconSize: 0.2,
+          region={{
+            latitude: currentLocation.lat,
+            longitude: currentLocation.long,
+            latitudeDelta: 0.001,
+            longitudeDelta: 0.015,
           }}
-        />
-
-        {/* Load icon for individual job markers */}
-        <Images images={{ icon_partime }} />
-      </ShapeSource>
-
-      {directionCoordinates && (
-        <ShapeSource 
-        id="routeSource" 
-        lineMetrics 
-        shape={{
-            properties: {},
-            type: 'Feature',
-            geometry: {
-              type: 'LineString',
-              coordinates: directionCoordinates,
-            },
-          }}>
-          <LineLayer id="exampleLineLayer" style={{ lineColor: '#0000FF', lineWidth: 2 }} />
-        </ShapeSource>
+          mapType="standard">
+             {events.length > 0 &&
+            events.map((event, index) => (
+              event.position && event.position.lat !== null && event.position.long !== null && (
+                <Marker
+                  key={`event${index}`}
+                  title={event.title}
+                  description=""
+                  onPress={() =>
+                    navigation.navigate('EventDetail', {item: event})
+                  }
+                  coordinate={{
+                    longitude: event.position.long,
+                    latitude: event.position.lat,
+                  }}>
+                  <MakerCustom type={event.category} />
+                </Marker>
+              )
+            ))}
+        </MapView>
+      ) : (
+        <></>
       )}
 
+      <View
+        style={{
+          position: 'absolute',
+          // backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          top: 0,
+          right: 0,
+          left: 0,
+          padding: 20,
+          paddingTop: 48,
+        }}>
+        <RowComponent>
+          <RowComponent styles={{flex: 1}}>
+            <InputComponent
+              styles={{marginBottom: 0}}
+              affix={
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('Explore', {
+                      screen: 'HomeScreen',
+                    })
+                  }>
+                  <ArrowLeft2 size={24} color={appColors.text} />
+                </TouchableOpacity>
+              }
+              placeholder="Search"
+              value=""
+              onChange={val => console.log(val)}
+            />
+          </RowComponent>
+          <SpaceComponent width={12} />
+          <CardComponent
+            onPress={getNearbyEvents}
+            styles={[globalStyles.noSpaceCard, {width: 56, height: 56}]}
+            color={appColors.white}>
+            <MaterialIcons
+              name="my-location"
+              size={28}
+              color={appColors.primary}
+            />
+          </CardComponent>
+        </RowComponent>
+        <SpaceComponent height={20} />
+        <CategoriesList onFilter={catId => getNearbyEvents(catId)} />
+      </View>
 
-    </Mapbox.MapView>
+      <LoadingModal visible={isLoading} />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 10,
+          right: 0,
+          left: 0,
+        }}>
+        <FlatList
+          initialScrollIndex={0}
+          data={events}
+          renderItem={({item}) => <EventItem item={item} type="list" imageUrl={item.photoUrl} />}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+    </View>
   );
 };
 

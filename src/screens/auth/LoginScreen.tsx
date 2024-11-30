@@ -82,7 +82,7 @@ const LoginScreen = ({navigation}: any) => {
         />
       </SectionComponent>
       <SectionComponent>
-        <TextComponent size={24} title text="Sign in" />
+        <TextComponent size={24} title text="Đăng nhập" />
         <SpaceComponent height={21} />
         <InputComponent
           value={email}
@@ -93,7 +93,7 @@ const LoginScreen = ({navigation}: any) => {
         />
         <InputComponent
           value={password}
-          placeholder="Password"
+          placeholder="Mật khẩu"
           onChange={val => setPassword(val)}
           isPassword
           allowClear
@@ -108,10 +108,10 @@ const LoginScreen = ({navigation}: any) => {
               onChange={() => setIsRemember(!isRemember)}
             />
             <SpaceComponent width={4} />
-            <TextComponent text="Remember me" />
+            <TextComponent text="Ghi nhớ tài khoản" />
           </RowComponent>
           <ButtonComponent
-            text="Forgot Password?"
+            text="Quên mật khẩu?"
             onPress={() => navigation.navigate('ForgotPassword')}
             type="text"
           />
@@ -122,17 +122,17 @@ const LoginScreen = ({navigation}: any) => {
         <ButtonComponent
           disable={isLoading || isDisable}
           onPress={handleLogin}
-          text="SIGN IN"
+          text="Đăng nhập"
           type="primary"
         />
       </SectionComponent>
       <SocialLogin />
       <SectionComponent>
         <RowComponent justify="center">
-          <TextComponent text="Don’t have an account? " />
+          <TextComponent text="Không có tài khoản? " />
           <ButtonComponent
             type="link"
-            text="Sign up"
+            text="Đăng ký"
             onPress={() => navigation.navigate('SignUpScreen')}
           />
         </RowComponent>

@@ -16,6 +16,11 @@ import DateTimePicker from './DateTimePicker';
 import ButtonImagePicker from './ButtonImagePicker';
 import MapComponent from './MapComponent';
 import DropdownPicker from './DropdownPicker';
+import TagComponent from './TagComponent';
+import MakerCustom from './MakerCustom';
+import LoadingComponent from './LoadingComponent';
+import AvatarComponent from './AvatarComponent';
+import RadioButtons from './RadioButtons'
 export {
   MapComponent,
   ButtonImagePicker,
@@ -35,4 +40,9 @@ export {
   ChoiceLocation,
   DateTimePicker,
   DropdownPicker,
+  TagComponent,
+  MakerCustom,
+  LoadingComponent,
+  AvatarComponent,
+  RadioButtons
 };

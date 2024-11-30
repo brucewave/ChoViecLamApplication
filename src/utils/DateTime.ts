@@ -10,9 +10,21 @@ export class DateTime {
   };
   static GetDate = (num: Date) => {
     const date = new Date(num);
+    const dayString = appInfo.dayNames[date.getDay()];
+    const day = numberToString(date.getDate()).padStart(2, '0');
+    const month = numberToString(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
 
-    return `${numberToString(date.getDate())} ${
-      appInfo.monthNames[date.getMonth()]
-    }, ${date.getFullYear()}`;
+    return `${dayString}, ${day}/${month}/${year}`;
+  }; 
+
+  static GetDayString = (num: number) => {
+    const date = new Date(num);
+    const dayString = appInfo.dayNames[date.getDay()];
+    const day = numberToString(date.getDate()).padStart(2, '0');
+    const month = numberToString(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${dayString}, ${day}/${month}/${year}`;
   };
 }

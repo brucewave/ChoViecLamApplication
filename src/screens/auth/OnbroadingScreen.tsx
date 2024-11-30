@@ -62,7 +62,7 @@ const OnbroadingScreen = ({navigation}: any) => {
         ]}>
         <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
           <TextComponent
-            text="Skip"
+            text="Bỏ qua"
             color={appColors.gray2}
             font={fontFamilies.medium}
           />
@@ -72,7 +72,7 @@ const OnbroadingScreen = ({navigation}: any) => {
             index < 2 ? setIndex(index + 1) : navigation.navigate('LoginScreen')
           }>
           <TextComponent
-            text="Next"
+            text="Tiếp theo"
             color={appColors.white}
             font={fontFamilies.medium}
           />

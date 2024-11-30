@@ -69,9 +69,9 @@ const SignUpScreen = ({navigation}: any) => {
     switch (key) {
       case 'email':
         if (!values.email) {
-          message = `Email is required!!!`;
+          message = `Email là bắt buộc`;
         } else if (!Validate.email(values.email)) {
-          message = 'Email is not invalid!!';
+          message = 'Email không hợp lệ!!';
         } else {
           message = '';
         }
@@ -79,14 +79,14 @@ const SignUpScreen = ({navigation}: any) => {
         break;
 
       case 'password':
-        message = !values.password ? `Password is required!!!` : '';
+        message = !values.password ? `Mật khẩu là bắt buộc` : '';
         break;
 
       case 'confirmPassword':
         if (!values.confirmPassword) {
-          message = `Please type confirm password!!`;
+          message = `Vui lòng nhập lại mật khẩu`;
         } else if (values.confirmPassword !== values.password) {
-          message = 'Password is not match!!!';
+          message = 'Mật khẩu không khớp';
         } else {
           message = '';
         }
@@ -125,11 +125,11 @@ const SignUpScreen = ({navigation}: any) => {
     <>
       <ContainerComponent isImageBackground isScroll back>
         <SectionComponent>
-          <TextComponent size={24} title text="Sign up" />
+          <TextComponent size={24} title text="Đăng ký" />
           <SpaceComponent height={21} />
           <InputComponent
             value={values.username}
-            placeholder="Full name"
+            placeholder="Họ và tên"
             onChange={val => handleChangeValue('username', val)}
             allowClear
             affix={<User size={22} color={appColors.gray} />}
@@ -144,7 +144,7 @@ const SignUpScreen = ({navigation}: any) => {
           />
           <InputComponent
             value={values.password}
-            placeholder="Password"
+            placeholder="Mật khẩu"
             onChange={val => handleChangeValue('password', val)}
             isPassword
             allowClear
@@ -153,7 +153,7 @@ const SignUpScreen = ({navigation}: any) => {
           />
           <InputComponent
             value={values.confirmPassword}
-            placeholder="Confirm password"
+            placeholder="Nhập lại mật khẩu"
             onChange={val => handleChangeValue('confirmPassword', val)}
             isPassword
             allowClear
@@ -180,7 +180,7 @@ const SignUpScreen = ({navigation}: any) => {
         <SectionComponent>
           <ButtonComponent
             onPress={handleRegister}
-            text="SIGN UP"
+            text="Đăng ký"
             disable={isDisable}
             type="primary"
           />
@@ -188,10 +188,10 @@ const SignUpScreen = ({navigation}: any) => {
         <SocialLogin />
         <SectionComponent>
           <RowComponent justify="center">
-            <TextComponent text="Don’t have an account? " />
+            <TextComponent text="Đã có tài khoản? " />
             <ButtonComponent
               type="link"
-              text="Sign in"
+              text="Đăng nhập"
               onPress={() => navigation.navigate('LoginScreen')}
             />
           </RowComponent>

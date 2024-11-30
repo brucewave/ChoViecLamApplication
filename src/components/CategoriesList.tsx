@@ -5,7 +5,7 @@ import {RowComponent, SpaceComponent, TextComponent} from '.';
 import {globalStyles} from '../styles/globalStyles';
 import {appColors} from '../constants/appColors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {ChefFork} from '../assets/svgs';
+import {ChefFork, KnifeFork_Color} from '../assets/svgs';
 
 interface Props {
   isColor?: boolean;
@@ -20,6 +20,7 @@ interface Category {
 
 const CategoriesList = (props: Props) => {
   const {isColor} = props;
+
 
   const categories: Category[] = [
     {
@@ -48,7 +49,11 @@ const CategoriesList = (props: Props) => {
     },
     {
       key: '3',
-      icon: <ChefFork color={isColor ? appColors.white : '#29D697'} />,
+      icon: isColor ? (
+        <ChefFork color="#29D697" />
+      ) : (
+        <KnifeFork_Color />
+      ),
       iconColor: '#29D697',
       title: 'Thời Vụ',
     },

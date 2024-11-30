@@ -20,6 +20,7 @@ import {
   CategoriesList,
   CircleComponent,
   EventItem,
+  LoadingComponent,
   RowComponent,
   SectionComponent,
   SpaceComponent,
@@ -36,18 +37,24 @@ import axios from 'axios';
 import { AddressModel } from '../../models/AddressModel';
 import Geocoder from 'react-native-geocoding';
 import jobAPI from '../../apis/jobApi';
+import { EventModel } from '../../models/EventModel';
+
+Geocoder.init(process.env.GOOGLE_API_KEY as string);
 
 const HomeScreen = ({navigation}: any) => {
-  const dispatch = useDispatch();
-  const [currentLocation, setCurrentLocation] = useState<AddressModel>();
+  // const [currentLocation, setCurrentLocation] = useState<AddressModel>();
   const [jobs, setJobs] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [diaChiHienTai, setDiaChiHienTai] = useState<AddressModel>();
+  const [events, setEvents] = useState<EventModel[]>([]);
+  const [nearbyEvents, setNearbyEvents] = useState<EventModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const response = await jobAPI.GetJobs(); 
-        // console.log('Danh sách công việc:', response.data); 
 
         const formattedJobs = response.data.map((job: any) => ({
           title: job.title,
@@ -56,12 +63,12 @@ const HomeScreen = ({navigation}: any) => {
             title: job.locationTitle || 'Không có tiêu đề địa điểm', 
             address: job.locationAddress || 'Không có địa chỉ', 
           },
-          imageUrl: job.photoUrl || '', // URL ảnh
-          users: job.users || [], // Danh sách người dùng
-          authorId: job._id, // ID tác giả
-          startAt: job.startAt, // Thời gian bắt đầu
-          endAt: job.endAt, // Thời gian kết thúc
-          date: job.date, // Ngày
+          imageUrl: job.photoUrl || '', 
+          users: job.users || [], 
+          authorId: job._id, 
+          startAt: job.startAt, 
+          endAt: job.endAt, 
+          date: job.date, 
         }));
 
         setJobs(formattedJobs.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())); 
@@ -75,116 +82,55 @@ const HomeScreen = ({navigation}: any) => {
 
   
   useEffect(() => {
+    getEvents();
     Geolocation.getCurrentPosition(position => {
-      if (position.coords) {
-        reverseGeoCode({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-      }
+      // console.log('position: ', position);
+      daoNguocDiaChi({
+        lat: position.coords.latitude,
+        long: position.coords.longitude,
+      });
     },
   );
   }, []);
 
+  useEffect(() => {
+    if (diaChiHienTai && diaChiHienTai.position) {
+      getEvents(diaChiHienTai.position.lat, diaChiHienTai.position.lng);
+    }
+  }, [diaChiHienTai]);
 
-  const auth = useSelector(authSelector);
+  const daoNguocDiaChi = async ({lat, long}: {lat: number, long: number}) => {
 
-
-
-
-  const getCoordinatesFromAddress = async (address: string) => {
-    const apiKey = process.env.GO_MAP_API_KEY;
-    const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-  
+    const apiKey = process.env.HERE_API_KEY;
+    
+    const apiUrl = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${long}&lang=vi&apiKey=${apiKey}`;
     try {
       const response = await axios.get(apiUrl);
-
-      if (response.data && response.data.results.length > 0) {
-        const result = response.data.results[0];
-        const location = result.geometry.location;
-        const formattedAddress = result.formatted_address;
-        const addressComponents = result.address_components;
-        // reverseGeoCode({ lat: location.lat, long: location.lng });
-
-
-      } else {
-        console.log('No results found for the address.');
+      if (response.status === 200 && response.data) {
+        const items = response.data.items;
+        setDiaChiHienTai(items[0]);
       }
     } catch (error) {
-      console.error('Error fetching coordinates:', error);
+      console.error('Error fetching address:', error);
     }
-  };
-  
-  useEffect(() => {
-    getCoordinatesFromAddress('64 Nguyễn Chí Thanh, Hải Châu, Đà Nẵng');
-  }, []);
+  }
 
-
-  const reverseGeoCode = async ({ lat, long }: { lat: number; long: number }) => {
-    const apiKey = process.env.GO_MAP_API_KEY;
-    const apiUrl = `https://maps.gomaps.pro/maps/api/geocode/json?latlng=${lat},${long}&key=${apiKey}`;
   
-    try {
-      const res = await axios.get(apiUrl);
-      console.log('----------------alooo--------------');
-      console.log('Địa chỉ', res.data);
-  
-      if (res.data && res.data.results.length > 0) {
-        const result = res.data.results[0];
-        const formattedAddress = result.formatted_address;
-
-        // Cập nhật currentLocation với formatted_address
-        setCurrentLocation({
-          address: {
-            city: '', // Bạn có thể thêm logic để lấy city nếu cần
-            countryCode: '', 
-            countryName: '', 
-            county: '', 
-            district: '', 
-            label: '', 
-            postalCode: '', 
-            street: '', 
-          },
-          distance: 0, 
-          id: '', 
-          mapView: {
-            east: 0, 
-            north: 0, 
-            south: 0,
-            west: 0, 
-          },
-          position: {
-            lat: lat,
-            lng: long,
-          },
-          resultType: '',
-          title: formattedAddress,
-        });
-      } else {
-        console.log('No results found for the coordinates.');
-      }
+  const getEvents = async (lat?: number, long?: number, distance?: number) => {
+    const api = `${lat && long ? 
+    `/getEvents?lat=${lat}&long=${long}&distance=${distance ?? 5}&limit=5` 
+    : `/getEvents?limit=5`}`;
+    // &date=${new Date().toISOString}`;
+    setIsLoading(true);
+    try{
+      const res = await jobAPI.HandleJob(api, null, 'get');
+      // console.log('response: ', res.data);
+      setIsLoading(false);
+      res && res.data && (lat && long ? setNearbyEvents(res.data) :  setEvents(res.data));
     } catch (error) {
-      console.log('Error fetching address:', error);
+      console.log('No data received from API');
     }
-  };
-
-
-
-  const itemEvent = {
-    title: 'Nhân viên phục vụ nhà hàng',
-    description:
-      'Nhà hàng Ánh Sao cần tuyển 10 nhân viên phục vụ nhà hàng',
-    location: {
-      title: 'Nhà hàng Ánh Sao',
-      address: '36 Nguyễn Chí Thanh, Hải Châu, Đà Nẵng',
-    },
-    imageUrl: '',
-    users: [''],
-    authorId: '',
-    startAt: Date.now(),
-    endAt: Date.now(),
-    date: Date.now(),
-  };
+  }
 
 
   const pullToRefresh = () => {
@@ -215,7 +161,7 @@ const HomeScreen = ({navigation}: any) => {
             <View style={[{flex: 1, alignItems: 'center'}]}>
               <RowComponent>
                 <TextComponent
-                  text="Current Location"
+                  text="Vị trí hiện tại"
                   color={appColors.white2}
                   size={12}
                 />
@@ -227,9 +173,9 @@ const HomeScreen = ({navigation}: any) => {
               </RowComponent>
 
 
-              {currentLocation && (
+              {diaChiHienTai && (
                 <TextComponent
-                text={currentLocation.title}
+                text={diaChiHienTai.address.city + ', ' + diaChiHienTai.address.county}
                 flex={0}
                 color={appColors.white}
                 font={fontFamilies.medium}
@@ -319,30 +265,25 @@ const HomeScreen = ({navigation}: any) => {
        ]}>
         <SectionComponent styles={{ paddingHorizontal: 0, paddingTop: 24 }}>
         <TabBarComponent title="Việc Vừa Đăng" onPress={() => {}} />
-          
-        <FlatList
-        refreshControl={
-          <RefreshControl refreshing={refresh} onRefresh={pullToRefresh} />
-        }
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          data={jobs} 
-          
-          
-          renderItem={({ item }) => {
-            const eventDate = new Date(item.date); 
-            const day = eventDate.getDate(); 
-            const month = eventDate.toLocaleString('default', { month: 'short' }).toUpperCase(); 
-            // console.log('item ne: ', item);
-            return (
-              <EventItem
-                imageUrl={item.imageUrl}
-                item={{ ...item, day, month }} // Thêm day và month vào item
-                type="card"
-              />
-            );
-          }}
-        />
+          {
+            events.length > 0 ? <FlatList
+            refreshControl={
+              <RefreshControl refreshing={refresh} onRefresh={pullToRefresh} />
+            }
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              data={events} 
+              renderItem={({ item, index }) => (
+                <EventItem
+                  key={`event${index}`}
+                  item={item}
+                  type="card"
+                />
+              )}
+               
+            /> : <LoadingComponent isLoading={isLoading} values={events.length} />
+          }
+       
       </SectionComponent>
        <SectionComponent>
          <ImageBackground 
@@ -375,25 +316,20 @@ const HomeScreen = ({navigation}: any) => {
           </ImageBackground>
         </SectionComponent>
         <SectionComponent styles={{paddingHorizontal: 0, paddingTop: 24}}>
-         <TabBarComponent title="Việc gần đây" onPress={() => {}} />
-         <FlatList
+         <TabBarComponent title="Việc Gần Đây" onPress={() => {}} />
+         {
+          nearbyEvents.length > 0 ? <FlatList
            showsHorizontalScrollIndicator={false}
            horizontal
-           data={Array.from({length: 5})}
-           renderItem={({item, index}) => {
-             const eventDate = new Date(itemEvent.date);
-             const day = eventDate.getDate();
-             const month = eventDate.toLocaleString('default', { month: 'short' }).toUpperCase();
-
-             return (
-               <EventItem key={`event${index}`} 
-                 imageUrl={itemEvent.imageUrl} 
-                 item={{ ...itemEvent, day, month }}
+           data={nearbyEvents}
+           renderItem={({item, index}) => (
+             <EventItem key={`event${index}`} 
+                 item={item}
                  type="card" 
                />
-             );
-           }}
-         />
+           )}
+         /> : <LoadingComponent isLoading={isLoading} values={nearbyEvents.length} />
+       }
        </SectionComponent>
       </ScrollView>
     </View>

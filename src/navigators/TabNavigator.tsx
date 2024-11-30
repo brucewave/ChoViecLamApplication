@@ -42,7 +42,7 @@ const TabNavigator = () => {
               icon = <MaterialIcons name="explore" size={size} color={color} />;
               break;
 
-            case 'Schedule':
+            case 'Việc':
               icon = <Calendar size={size} variant="Bold" color={color} />;
               break;
             case 'Map':
@@ -85,7 +85,7 @@ const TabNavigator = () => {
         },
       })}>
       <Tab.Screen name="Explore" component={ExploreNavigator} />
-      <Tab.Screen name="Schedule" component={EventNavigator} />
+      <Tab.Screen name="Việc" component={EventNavigator} />
       <Tab.Screen name="Add" component={AddNewScreen} />
       <Tab.Screen name="Map" component={MapNavigator} />
       <Tab.Screen name="Profile" component={ProfileNavigator} />

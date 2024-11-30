@@ -18,7 +18,7 @@ import { JobModel } from '../models/JobModel';
 import { appInfo } from '../constants/appInfos';
 import Toast from 'react-native-toast-message';
 import LoadingModal from '../modals/LoadingModal';
-
+import { useNavigation } from '@react-navigation/native';
 const initValues = {
   title: '',
   description: '',
@@ -30,19 +30,20 @@ const initValues = {
   },
   photoUrl: '',
   users: [],
-  authorId: '',
+  authorID: '',
   startAt: Date.now(),
   endAt: Date.now(),
   date: Date.now(),
-  price: '',
+  price: 0,
   category: '',
 };
 
 const AddNewScreen = () => {
   const auth = useSelector(authSelector);
+  const navigation = useNavigation();
   const [eventData, setEventData] = useState<any>({
     ...initValues,
-    authorId: auth.id,
+    authorID: auth.id,
   });
   
   const [usersSelects, setUsersSelects] = useState<SelectModel[]>([]);
@@ -91,7 +92,7 @@ const AddNewScreen = () => {
 
         const config = {
           method: 'post',
-          url: 'http://192.168.0.105:3001/upload/uploadImage',
+          url: `${appInfo.BASE_URL}/upload/uploadImage`,
           data: formData,
         };
 
@@ -126,6 +127,9 @@ const AddNewScreen = () => {
     try {
       const response = await jobAPI.HandleJob(api, job, 'post');
       console.log(response);
+      navigation.navigate('Explore', {
+        screen: 'HomeScreen',
+      });
       Toast.show({
         text1: 'Thêm công việc thành công',
         position: 'top', 
@@ -139,11 +143,12 @@ const AddNewScreen = () => {
 
 
   const handleLocation = (val: any) => {
-    const items = {...eventData};
+    const items = { ...eventData };
     items.locationAddress = val.address;
     items.position = val.postion;
 
     setEventData(items);
+    console.log('Updated eventData:', items);
   };
 
   return (
@@ -230,7 +235,13 @@ const AddNewScreen = () => {
           <ChoiceLocation onSelect={value => handleLocation(value)} />
         </SectionComponent>
         <SectionComponent>
-          <InputComponent placeholder="Lương" type="number-pad" allowClear value={eventData.price} onChange={value => handdleChangeValue('price', value)} />
+          <InputComponent 
+            placeholder="Lương" 
+            type="number-pad" 
+            allowClear 
+            value={String(eventData.price)} 
+            onChange={value => handdleChangeValue('price', value)} 
+          />
         </SectionComponent>
         {errorsMess.length > 0 && (
           <SectionComponent>

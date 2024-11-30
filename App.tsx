@@ -20,8 +20,8 @@ const App = () => {
         />
         <Host>
           <NavigationContainer>
-            <AppRouters />
-            <Toast />
+              <AppRouters />
+              <Toast />
           </NavigationContainer>
           </Host>
         </Provider>

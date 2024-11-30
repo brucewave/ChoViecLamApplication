@@ -1,20 +1,21 @@
-import { View, Text, Modal, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { ButtonComponent, InputComponent, MapComponent, TextComponent } from '../components';
-import { RowComponent, SpaceComponent } from '../components';
-import { appColors } from '../constants/appColors';
+import { View, Text, Modal, TouchableOpacity, Button, ActivityIndicator, FlatList } from "react-native";
+import { ButtonComponent, InputComponent, SpaceComponent, TextComponent } from "../components";
+import { RowComponent } from "../components";
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { SearchNormal1 } from 'iconsax-react-native';
-import axios from 'axios';
-import { LocationModel } from '../models/LocationModel';
+import { appColors } from "../constants/appColors";
+import { useEffect, useState } from "react";
+import { SearchNormal1 } from "iconsax-react-native";
+import axios from "axios";
+import { LocationModel } from "../models/LocationModel";
 import MapView from 'react-native-maps';
-import { appInfo } from '../constants/appInfos';
-import Geolocation from '@react-native-community/geolocation';
-import { AddressModel } from '../models/AddressModel';
-import Geocoder from 'react-native-geocoding';
-import { AxiosRequestConfig } from 'axios';
+import { appInfo } from "../constants/appInfos";
+import GeoLocation from "@react-native-community/geolocation";
+import { AddressModel } from "../models/AddressModel";
+import GeoCoder from 'react-native-geocoding';
+import { globalStyles } from '../styles/globalStyles'; 
 
-Geocoder.init(process.env.MAP_API_KEY as string);
+GeoCoder.init(process.env.GOOGLE_API_KEY as string);
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -28,147 +29,204 @@ interface Props {
 }
 
 
+
 const ModalLocation = (props: Props) => {
   const {visible, onClose, onSelect} = props;
   const [searchKey, setSearchKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [addressSelected, setAddressSelected] = useState('');
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; long: number; }>();
+
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    long: number;
+  }>();
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-      if (position.coords) {
-        setCurrentLocation({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-      }
-    });
+    GeoLocation.getCurrentPosition(
+      position => {
+        if (position.coords) {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            long: position.coords.longitude,
+          });
+        }
+      },
+      error => {
+        console.log(error);
+      },
+      {},
+    );
   }, []);
 
-  const handleSearchLocation = async () => {
-    const apiKey = process.env.MAP_API_KEY || 'lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As';
-    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=lcIT8toRfGKDLZwdIWEdB2Y9Uvur1CvjXZ9aZwEA5As`;
+  useEffect(() => {
+    GeoCoder.from(addressSelected)
+      .then(res => {
+        const position = res.results[0].geometry.location;
 
-    try {
-      setIsLoading(true);
-      const response = await fetch(api);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data && data.items) {
-        setLocations(data.items);
-      } else {
-        console.log("Không có dữ liệu trả về từ API");
-      }
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm địa chỉ:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGetLatLongFromAddress = async (address: string) => {
-    const apiKey = process.env.MAP_API_KEY;
-    const apiUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(address)}&apiKey=${apiKey}`;
-
-    try {
-      const response = await axios.get(apiUrl);
-  
-      // Here API trả về trong `items`, không phải `results`
-      if (response.data && response.data.items && response.data.items.length > 0) {
-        const location = response.data.items[0].position;
-        const currentLocation = {
-          lat: location.lat,
-          long: location.lng,
-        };
-        
-        console.log('--------location---------');
-        console.log(currentLocation.lat);
-        console.log(currentLocation.long);
-        setCurrentLocation(currentLocation);
-        return currentLocation;
-      } else {
-        console.log('Không tìm thấy địa chỉ');
-        return null;
-      }
-    } catch (error) {
-      // console.error('Lỗi khi lấy thông tin địa chỉ:', error);
-      return null;
-    }
-  };
-  const handleClose = () => {
-    onClose();
-  }
+        setCurrentLocation({
+          lat: position.lat,
+          long: position.lng,
+        });
+      })
+      .catch(error => console.log(error));
+  }, [addressSelected]);
 
   useEffect(() => {
     if (!searchKey) {
       setLocations([]);
     }
   }, [searchKey]);
-  
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  const handleSearchLocation = async () => {
+    const api = `https://autocomplete.search.hereapi.com/v1/autocomplete?q=${searchKey}&limit=20&apiKey=EoGZAqvCk9NFBvK6Trb_9iudji1DWPy1QfnsJN0GRlo`;
+
+    try {
+      setIsLoading(true);
+      const res = await axios.get(api);
+
+      if (res && res.data && res.status === 200) {
+        setLocations(res.data.items);
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleGetAddressFromPosition = ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    onSelect({
+      address: 'This is demo address',
+      postion: {
+        lat: latitude,
+        long: longitude,
+      },
+    
+    });
+    onClose();
+    // GeoCoder.from(latitude, longitude)
+    //   .then(data => {
+    //     // console.log(data);
+    //     // console.log(data.results[0].address_components[0]);
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
+  };
+
 
   return (
-    <Modal animationType="fade" visible={visible} style={{flex: 1}}>
-      <View style={{paddingVertical: 42, paddingHorizontal: 42}}>
+    <Modal 
+      animationType="slide" 
+      visible={visible} 
+      style={{flex: 1}}
+    >
+      <View style={{paddingVertical: 42, paddingHorizontal: 22}}>
         <RowComponent justify="flex-end" styles={{marginVertical: 10}}>
           <View style={{flex: 1}}>
             <InputComponent 
               styles={{marginBottom: 0}}
               affix={<SearchNormal1 size={20} color={appColors.gray} />}
-              placeholder="Tìm kiếm địa chỉ" 
+              placeholder="Tìm kiếm địa chỉ"
               value={searchKey} 
               allowClear
-              onEnd={handleSearchLocation}
               onChange={val => setSearchKey(val)} 
+              onEnd={handleSearchLocation}
             />
-            <View style={{position: 'absolute', top: 60, right: 10, left: 10, backgroundColor: appColors.white, zIndex: 5, padding: 20}}>
-              {isLoading ? <ActivityIndicator /> : locations.length > 0 ? (
-                <FlatList 
-                  data={locations} 
-                  renderItem={({item}) => 
-                    <TouchableOpacity onPress={() => {
-                      setAddressSelected(item.address.label);
-                      setSearchKey(item.address.label);
-                      handleGetLatLongFromAddress(item.address.label);
-                      setLocations([]);
-                    }}>
-                      <TextComponent text={item.address.label} />
-                    </TouchableOpacity>
-                  } 
-                />
-              ) : <TextComponent text={searchKey? '' : 'Tìm kiếm địa chỉ'} />}
-            </View>
           </View>
           <SpaceComponent width={12} />
           <ButtonComponent text="Đóng" type="link" onPress={handleClose} />
+          {/* <TouchableOpacity onPress={handleClose}>
+            <AntDesign name="close" size={20} color={appColors.text} />
+          </TouchableOpacity> */}
         </RowComponent>
-      {/* {currentLocation && } */}
-      {/* <MapComponent apikey={process.env.MAP_API_KEY as string} /> */}
-
-
-
-      <ButtonComponent styles={{marginTop: 40}} text="Chọn" onPress={() => {
-        onSelect({
-          address: addressSelected,
-          postion: currentLocation,
-        });
-        console.log(addressSelected)
-        onClose();
-      }} type="primary" />
+        <View style={{flex: 1}}>
+        <View style={{position: 'absolute', top: 0, right: 10, left: 10, backgroundColor: appColors.white, zIndex: 5, padding: 20}}>
+          {isLoading ? (
+            <ActivityIndicator />
+          ) : locations.length > 0 ? (
+            <FlatList
+              data={locations}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                 style={{marginBottom: 12}}
+                 onPress={() => {
+                  setAddressSelected(item.address.label);
+                  setSearchKey('');
+                }}>
+                  <TextComponent text={item.address.label} />
+                </TouchableOpacity>
+              )}
+            />
+            ) : (
+              <View>
+                <TextComponent text={searchKey? 'Không tìm thấy địa chỉ' : ''} />
+              </View>
+            )}
+          </View>
+        </View>
       </View>
+      {
+        currentLocation && (
+          <MapView
+          showsUserLocation
+          showsMyLocationButton
+          style={{width: appInfo.sizes.WIDTH, height: 400, marginTop: 140}} 
+          initialRegion={{
+            latitude: currentLocation.lat,
+            longitude: currentLocation.long,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+            }} 
+              onPress={event => {
+                handleGetAddressFromPosition(event.nativeEvent.coordinate);
+              }}
+            region={{
+              latitude: currentLocation.lat,
+              longitude: currentLocation.long,
+              latitudeDelta: 0.001,
+              longitudeDelta: 0.015,
+            }}
+            mapType="standard"
+            // onRegionChange={val => console.log('val: ', val)}
+            
+          />
+        )
+      }
+       <View
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            left: 0,
+            right: 0,
+          }}>
+          <ButtonComponent
+            styles={{marginBottom: 40}}
+            text="Confirm"
+            onPress={() => {
+              onSelect({
+                address: addressSelected,
+                postion: currentLocation,
+              });
 
-
-      <MapComponent />
-
-
+              onClose();
+            }}
+            type="primary"
+          />
+        </View>
     </Modal>
   )
 }
 
-export default ModalLocation
+export default ModalLocation    

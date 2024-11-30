@@ -109,7 +109,7 @@ const SocialLogin = () => {
         onPress={handleLoginWithGoogle}
         color={appColors.white}
         textColor={appColors.text}
-        text="Login with Google"
+        text="Đăng nhập bằng Google"
         textFont={fontFamilies.regular}
         iconFlex="left"
         icon={<Google />}
@@ -119,7 +119,7 @@ const SocialLogin = () => {
         type="primary"
         color={appColors.white}
         textColor={appColors.text}
-        text="Login with Facebook"
+        text="Đăng nhập bằng Facebook"
         textFont={fontFamilies.regular}
         onPress={handleLoginWithFacebook}
         iconFlex="left"

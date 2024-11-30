@@ -110,22 +110,22 @@ const Verification = ({navigation, route}: any) => {
           dispatch(addAuth(res.data));
           await AsyncStorage.setItem('auth', JSON.stringify(res.data));
         } catch (error) {
-          setErrorMessage('User has already exist!!!');
+          setErrorMessage('Tên tài khoản đã tồn tại');
           console.log(`Can not create new user ${error}`);
         }
       }
     } else {
-      setErrorMessage('Time out verification code, please resend new code!!!');
+      setErrorMessage('Thời gian hết hạn mã xác thực, vui lòng gửi mã mới');
     }
   };
 
   return (
     <ContainerComponent back isImageBackground isScroll>
       <SectionComponent>
-        <TextComponent text="Verification" title />
+        <TextComponent text="Xác thực" title />
         <SpaceComponent height={12} />
         <TextComponent
-          text={`We’ve send you the verification code on ${email.replace(
+          text={`Chúng tôi đã gửi mã xác thực vào ${email.replace(
             /.{1,5}/,
             (m: any) => '*'.repeat(m.length),
           )}`}
@@ -228,7 +228,7 @@ const Verification = ({navigation, route}: any) => {
           <RowComponent>
             <ButtonComponent
               type="link"
-              text="Resend email verification"
+              text="Gửi lại mã xác thực"
               onPress={handleResendVerification}
             />
           </RowComponent>

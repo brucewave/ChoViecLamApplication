@@ -37,49 +37,50 @@ const DrawerCustom = ({navigation}: any) => {
   const profileMenu = [
     {
       key: 'MyProfile',
-      title: 'My Profile',
+      title: 'Cá Nhân',
       icon: <User size={size} color={color} />,
+      
     },
     {
       key: 'Message',
-      title: 'Message',
+      title: 'Tin nhắn',
       icon: <Message2 size={size} color={color} />,
     },
     {
       key: 'Calendar',
-      title: 'Calendar',
+      title: 'Lịch',
       icon: <Calendar size={size} color={color} />,
     },
     {
       key: 'Bookmark',
-      title: 'Bookmark',
+      title: 'Đánh dấu',
       icon: <Bookmark2 size={size} color={color} />,
     },
     {
       key: 'ContactUs',
-      title: 'Contact Us',
+      title: 'Liên hệ',
       icon: <Sms size={size} color={color} />,
     },
     {
       key: 'Settings',
-      title: 'Settings',
+      title: 'Cài đặt',
       icon: <Setting2 size={size} color={color} />,
     },
     {
       key: 'HelpAndFAQs',
-      title: 'Help & FAQs',
+      title: 'Trợ giúp & Câu hỏi thường gặp',
       icon: <MessageQuestion size={size} color={color} />,
     },
     {
       key: 'SignOut',
-      title: 'Sign Out',
+      title: 'Đăng xuất',
       icon: <Logout size={size} color={color} />,
     },
   ];
 
   const handleSignOut = async () => {
     await GoogleSignin.signOut();
-    await LoginManager.logOut();
+    LoginManager.logOut();
     dispatch(removeAuth({}));
     await AsyncStorage.clear();
   };
@@ -125,10 +126,15 @@ const DrawerCustom = ({navigation}: any) => {
             onPress={
               item.key === 'SignOut'
                 ? () => handleSignOut()
-                : () => {
-                    console.log(item.key);
-                    navigation.closeDrawer();
-                  }
+                : item.key === 'MyProfile'
+                  ? () => {
+                      navigation.closeDrawer();
+                      navigation.navigate('Profile', { screen: 'ProfileScreen' });
+                    }
+                  : () => {
+                      console.log(item.key);
+                      navigation.closeDrawer();
+                    }
             }>
             {item.icon}
             <TextComponent

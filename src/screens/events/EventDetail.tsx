@@ -1,5 +1,5 @@
 import {ArrowLeft, ArrowRight, Calendar, Location} from 'iconsax-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ImageBackground,
   ScrollView,
@@ -13,9 +13,10 @@ import {
   AvatarGroup,
   ButtonComponent,
   CardComponent,
+  LoadingComponent,
   RowComponent,
   SectionComponent,
-  SpaceComponent, 
+  SpaceComponent,
   TabBarComponent,
   TextComponent,
 } from '../../components';
@@ -23,14 +24,70 @@ import {appColors} from '../../constants/appColors';
 import {EventModel} from '../../models/EventModel';
 import {globalStyles} from '../../styles/globalStyles';
 import {fontFamilies} from '../../constants/fontFamilies';
+import { useSelector, useDispatch } from 'react-redux';
+import { authSelector, AuthState } from '../../redux/reducers/authReducer';
+import jobAPI from '../../apis/jobApi';
+import LoadingModal from '../../modals/LoadingModal';
+import { UserHandlers } from '../../utils/UserHandlers';
+import { DateTime } from '../../utils/DateTime';
 
 const EventDetail = ({navigation, route}: any) => {
   const {item}: {item: EventModel} = route.params;
+  const auth: AuthState = useSelector(authSelector)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFollowed, setIsFollowed] = useState<string[]>([]);
+  const dispatch = useDispatch();
+
+useEffect(() => {
+    item && getFollowers();
+}, [item])
+
+const getFollowers = async () => {
+  const api = `/getFollowers?id=${item._id}`
+  try{  
+    const res = await jobAPI.HandleJob(api, {}, 'get')
+    res && res.data && setIsFollowed(res.data)
+  }catch(err){
+    console.log(err)
+  }
+}
+
+  const handleFollower =  () => {
+   const items = [...isFollowed];
+   if(items.includes(auth.id)){
+    const index = items.findIndex(element => element === auth.id)
+    if(index !== -1){
+      items.splice(index, 1)
+    }
+   }else{
+    items.push(auth.id)
+   }
+   setIsFollowed(items)
+   handleUpdateFollowers(items)
+  }
+
+  const handleUpdateFollowers = async (data: string[]) => {
+    
+    await UserHandlers.getJobsFollowed(item._id, dispatch)
+    
+    const api = `/updateFollowers`
+    try{
+      const res = await jobAPI.HandleJob(api, {
+        id: item._id,
+        followers: data,
+      }, 'post')
+      if(res.status === 200){
+          console.log('Update successful')
+      }
+    }catch(err){
+      console.log('Error updating followers:', err)
+    }
+  }
 
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
       <ImageBackground
-        source={require('../../assets/images/event-image.png')}
+        source={{uri: item.photoUrl}}
         style={{flex: 1, height: 244}}
         imageStyle={{
           resizeMode: 'cover',
@@ -54,16 +111,25 @@ const EventDetail = ({navigation, route}: any) => {
               </TouchableOpacity>
               <TextComponent
                 flex={1}
-                text="Event Details"
+                text="Chi Tiết Công Việc"
                 title
                 color={appColors.white}
               />
               <CardComponent
+                onPress={handleFollower}
                 styles={[globalStyles.noSpaceCard, {width: 36, height: 36}]}
-                color="#ffffff4D">
+                color={
+                  auth.follow_jobs && auth.follow_jobs.includes(item._id)
+                    ? '#ffffffB3'
+                    : '#ffffff4D'
+                }>
                 <MaterialIcons
                   name="bookmark"
-                  color={appColors.white}
+                  color={
+                    auth.follow_jobs && auth.follow_jobs.includes(item._id)
+                      ? appColors.danger2
+                      : appColors.white
+                  }
                   size={22}
                 />
               </CardComponent>
@@ -77,8 +143,12 @@ const EventDetail = ({navigation, route}: any) => {
             flex: 1,
             paddingTop: 244 - 130,
           }}>
+
+
           <SectionComponent>
-            <View
+            {
+              item.users.length > 0 ? (
+              <View
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -95,7 +165,7 @@ const EventDetail = ({navigation, route}: any) => {
                     width: '90%',
                   },
                 ]}>
-                <AvatarGroup size={36} />
+                <AvatarGroup userIds={item.user || []} size={36} />
                 <TouchableOpacity
                   style={[
                     globalStyles.button,
@@ -103,8 +173,18 @@ const EventDetail = ({navigation, route}: any) => {
                   ]}>
                   <TextComponent text="Invite" color={appColors.white} />
                 </TouchableOpacity>
-              </RowComponent>
-            </View>
+                </RowComponent>
+              </View>
+            ) : (
+              <>
+                <ButtonComponent
+                  text="Invite"
+                type="primary"
+                  onPress={() => {}}
+                />
+              </>
+            )
+            }
           </SectionComponent>
           <View
             style={{
@@ -137,17 +217,17 @@ const EventDetail = ({navigation, route}: any) => {
                     justifyContent: 'space-around',
                   }}>
                   <TextComponent
-                    text="14 December, 2021"
+                    text={DateTime.GetDate(item.date)}
                     font={fontFamilies.medium}
                     size={16}
                   />
                   <TextComponent
-                    text="Tuesday, 4:00PM - 9:00PM"
+                    text={DateTime.GetTime(item.startAt)}
                     color={appColors.gray}
                   />
                 </View>
               </RowComponent>
-              <RowComponent styles={{marginBottom: 20}}>
+              <RowComponent styles={{marginBottom: 20, alignItems: 'flex-start'}}>
                 <CardComponent
                   styles={[globalStyles.noSpaceCard, {width: 48, height: 48}]}
                   color={`${appColors.primary}4D`}>
@@ -165,12 +245,12 @@ const EventDetail = ({navigation, route}: any) => {
                     justifyContent: 'space-around',
                   }}>
                   <TextComponent
-                    text={item.location.title}
+                    text={item.locationTitle}
                     font={fontFamilies.medium}
                     size={16}
                   />
                   <TextComponent
-                    text={item.location.address}
+                    text={item.locationAddress}
                     color={appColors.gray}
                   />
                 </View>
@@ -178,7 +258,7 @@ const EventDetail = ({navigation, route}: any) => {
               <RowComponent styles={{marginBottom: 20}}>
                 <Image
                   source={{
-                    uri: 'https://www.asirox.com/wp-content/uploads/2022/07/pngtree-user-vector-avatar-png-image_1541962.jpeg',
+                    uri: item.photoUrl,
                   }}
                   style={{
                     width: 48,
@@ -195,12 +275,12 @@ const EventDetail = ({navigation, route}: any) => {
                     justifyContent: 'space-around',
                   }}>
                   <TextComponent
-                    text="Son Tung MTP"
+                    text="Lương"
                     font={fontFamilies.medium}
                     size={16}
                   />
                   <TextComponent
-                    text="Tuesday, 4:00PM - 9:00PM"
+                    text={`${item.price} K/Giờ`}
                     color={appColors.gray}
                   />
                 </View>
@@ -209,7 +289,7 @@ const EventDetail = ({navigation, route}: any) => {
             <TabBarComponent title="About Event" onPress={() => {}} />
             <SectionComponent>
               <TextComponent
-                text={`Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis necessitatibus ratione asperiores odit exercitationem repellat aliquam at officiis, quasi natus? Consequatur, amet! Iusto velit vitae quidem autem maxime qui exercitationem.`}
+                text={item.description}
               />
             </SectionComponent>
           </View>
@@ -226,7 +306,7 @@ const EventDetail = ({navigation, route}: any) => {
           padding: 12,
         }}>
         <ButtonComponent
-          text="BUY TICKET $120"
+          text="Liên Hệ Ngay"
           type="primary"
           onPress={() => {}}
           iconFlex="right"
@@ -243,6 +323,7 @@ const EventDetail = ({navigation, route}: any) => {
           }
         />
       </LinearGradient>
+      <LoadingModal visible={isLoading} />
     </View>
   );
 };

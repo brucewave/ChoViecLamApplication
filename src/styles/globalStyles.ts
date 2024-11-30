@@ -13,6 +13,10 @@ export const globalStyles = StyleSheet.create({
     fontSize: 14,
     color: appColors.text,
   },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   button: {
     borderRadius: 12,

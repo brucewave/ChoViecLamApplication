@@ -18,7 +18,6 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async (config: any) => {
   const accesstoken = await getAccessToken();
-  console.log(accesstoken);
   config.headers = {
     Authorization: accesstoken ? `Bearer ${accesstoken}` : '',
     Accept: 'application/json',
